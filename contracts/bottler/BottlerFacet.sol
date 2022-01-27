@@ -81,10 +81,14 @@ contract BottlerFacet is ERC1155Holder {
         );
 
         TerminusFacet terminus = getTerminusContract();
-        uint256 _poolId = bs.fullBottlePoolIds[poolIndex];
+        uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
+        uint256 emptyBottlePoolId = bs.emptyBottlePoolIds[poolIndex];
 
+        //
         require(
-            terminus.terminusPoolSupply(_poolId) + bottlesCount <=
+            terminus.terminusPoolSupply(fullBottlePoolId) +
+                terminus.terminusPoolSupply(emptyBottlePoolId) +
+                bottlesCount <=
                 bs.bottleCapacities[poolIndex],
             "BottlerFacet:fillBottles - Not enough empty bottles available"
         );
@@ -92,7 +96,7 @@ contract BottlerFacet is ERC1155Holder {
         IERC20 unim = getUnimContract();
         unim.transferFrom(msg.sender, address(this), amount);
 
-        terminus.mint(msg.sender, _poolId, bottlesCount, "");
+        terminus.mint(msg.sender, fullBottlePoolId, bottlesCount, "");
     }
 
     function fillSmallBottles(uint256 bottlesCount) external {

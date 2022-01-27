@@ -189,7 +189,7 @@ Setting bottles capacities
         --sender $SENDER_KEYFILE \
         --max-fee-per-gas "$MAX_FEE_PER_GAS" \
         --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-        --new-bottle-capacities  
+        --new-bottle-capacities 5000 2000 500
 ```
 
 
