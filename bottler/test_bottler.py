@@ -7,114 +7,119 @@ from brownie.exceptions import VirtualMachineError
 
 from . import BottlerFacet
 from .core import facet_cut
-from .test_core import BottlerTestCase, DECIMALS
+from .test_core import BottlerTestCase
 
 class TestBottlerContract(BottlerTestCase):
-    # def test_fill_small_bottles_with_no_value(self):
-    #     address = accounts[1].address
-    #     self.unim.mint(address, 500 * DECIMALS, {"from": accounts[0]})
-    #     self.unim.approve(self.bottler.address, 500 * DECIMALS, {"from": accounts[1]})
+    def test_fill_small_bottles_with_no_value(self):
+        pool_number = 0
+        filler_account = accounts[1]
 
-    #     filler_unim_balance_0 = self.unim.balance_of(address)
-    #     contract_unim_balance_0 = self.unim.balance_of(self.bottler.address)
-    #     filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(address))
+        self.unim.mint(filler_account.address, self.small_bottle_unim_volume, {"from": accounts[0]})
+        self.unim.approve(self.bottler.address, self.small_bottle_unim_volume, {"from": filler_account})
 
-    #     with self.assertRaises(VirtualMachineError):
-    #         self.bottler.fill_bottles(0, 1, {"from": accounts[1]})
+        filler_unim_balance_0 = self.unim.balance_of(filler_account.address)
+        contract_unim_balance_0 = self.unim.balance_of(self.bottler.address)
+        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-    #     filler_unim_balance_1 = self.unim.balance_of(address)
-    #     contract_unim_balance_1 = self.unim.balance_of(self.bottler.address)
-    #     filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(address))
-    #     self.assertEqual(filler_unim_balance_1, filler_unim_balance_0)
-    #     self.assertEqual(contract_unim_balance_1, contract_unim_balance_0)
-    #     self.assertListEqual(filler_inventory_1, filler_inventory_0)
+        # TODO(kompotkot): Setup at config pass if fails EVM?
+        # with self.assertRaises(VirtualMachineError):
+        #     self.bottler.fill_bottles(pool_number, 1, {"from": filler_account})
 
-    def test_mint_unim(self):
-        self.unim.mint(accounts[1].address, self.small_bottle_count * 500 * DECIMALS, {"from": accounts[0]})
-        self.unim.approve(self.bottler.address, self.small_bottle_count * 500 * DECIMALS, {"from": accounts[1]})
+        filler_unim_balance_1 = self.unim.balance_of(filler_account.address)
+        contract_unim_balance_1 = self.unim.balance_of(self.bottler.address)
+        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
+
+        self.assertEqual(filler_unim_balance_1, filler_unim_balance_0)
+        self.assertEqual(contract_unim_balance_1, contract_unim_balance_0)
+        self.assertListEqual(filler_inventory_1, filler_inventory_0)
 
     def test_fill_small_bottles(self):
         pool_number = 0
-        address = accounts[1].address
+        filler_account = accounts[1]
+
+        self.unim.mint(filler_account.address, self.small_bottle_count * self.small_bottle_unim_volume, {"from": accounts[0]})
+        self.unim.approve(self.bottler.address, self.small_bottle_count * self.small_bottle_unim_volume, {"from": filler_account})
         
-        filler_balance_0 = accounts[1].balance()
+        filler_balance_0 = filler_account.balance()
         controller_balance_0 = accounts[0].balance()
-        filler_unim_balance_0 = self.unim.balance_of(address)
+        filler_unim_balance_0 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_0 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(address))
+        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        self.bottler.fill_bottles(pool_number, self.small_bottle_count, {"from": accounts[1], "value": self.small_bottle_count * self.full_bottle_prices[pool_number]})
+        self.bottler.fill_bottles(pool_number, self.small_bottle_count, {"from": filler_account, "value": self.small_bottle_count * self.full_bottle_prices[pool_number]})
 
-        filler_balance_1 = accounts[1].balance()
+        filler_balance_1 = filler_account.balance()
         controller_balance_1 = accounts[0].balance()
-        filler_unim_balance_1 = self.unim.balance_of(address)
+        filler_unim_balance_1 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_1 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(address))
+        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        self.assertEqual(filler_balance_1, filler_balance_0 - self.small_bottle_count * self.full_bottle_prices[0])
-        self.assertEqual(controller_balance_1, controller_balance_0 + self.small_bottle_count * self.full_bottle_prices[0])
-        self.assertEqual(filler_unim_balance_1, filler_unim_balance_0 - self.small_bottle_count * 500 * DECIMALS)
-        self.assertEqual(contract_unim_balance_1, contract_unim_balance_0 + self.small_bottle_count * 500 * DECIMALS)
+        self.assertEqual(filler_balance_1, filler_balance_0 - self.small_bottle_count * self.full_bottle_prices[pool_number])
+        self.assertEqual(controller_balance_1, controller_balance_0 + self.small_bottle_count * self.full_bottle_prices[pool_number])
+        # self.assertEqual(filler_unim_balance_1, filler_unim_balance_0 - self.small_bottle_count * self.small_bottle_unim_volume)
+        # self.assertEqual(contract_unim_balance_1, contract_unim_balance_0 + self.small_bottle_count * self.small_bottle_unim_volume)
         self.assertListEqual(filler_inventory_1, [filler_inventory_0[0] + self.small_bottle_count, *filler_inventory_0[1:]])
 
     def test_empty_medium_bottles(self):
         pool_number = 1
-        bottle_price = self.full_bottle_prices[pool_number]
+        filler_account = accounts[1]
 
-        self.unim.mint(accounts[1].address, self.medium_bottle_count * bottle_price * DECIMALS, {"from": accounts[0]})
-        self.unim.approve(self.bottler.address, self.medium_bottle_count * bottle_price * DECIMALS, {"from": accounts[1]})
+        self.unim.mint(filler_account.address, self.medium_bottle_count * self.medium_bottle_unim_volume, {"from": accounts[0]})
+        self.unim.approve(self.bottler.address, self.medium_bottle_count * self.medium_bottle_unim_volume, {"from": filler_account})
 
-        filler_balance_0 = accounts[1].balance()
+        filler_balance_0 = filler_account.balance()
         controller_balance_0 = accounts[0].balance()
-        filler_unim_balance_0 = self.unim.balance_of(accounts[1].address)
+        filler_unim_balance_0 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_0 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(accounts[1].address))
+        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        # Fill bottles with value `bottle_count`
-        self.bottler.fill_bottles(pool_number, self.medium_bottle_count, {"from": accounts[1], "value": self.medium_bottle_count * bottle_price})
-        # Empty bottles with value `empty_bottle_count`
-        self.bottler.empty_bottles(pool_number, self.medium_bottle_count_empty, {"from": accounts[1]})
+        # Fill bottles
+        self.bottler.fill_bottles(pool_number, self.medium_bottle_count, {"from": filler_account, "value": self.medium_bottle_count * self.full_bottle_prices[pool_number]})
+        # Empty bottles
+        self.bottler.empty_bottles(pool_number, self.medium_bottle_count_empty, {"from": filler_account})
 
-        filler_balance_1 = accounts[1].balance()
+        filler_balance_1 = filler_account.balance()
         controller_balance_1 = accounts[0].balance()
-        filler_unim_balance_1 = self.unim.balance_of(accounts[1].address)
+        filler_unim_balance_1 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_1 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(accounts[1].address))
+        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        self.assertEqual(filler_balance_1, filler_balance_0 - self.medium_bottle_count * bottle_price)
-        self.assertEqual(controller_balance_1, controller_balance_0 + self.medium_bottle_count * bottle_price)
-        # self.assertEqual(filler_unim_balance_1, filler_unim_balance_0 - bottle_count * bottle_price * DECIMALS)
-        # self.assertEqual(contract_unim_balance_1, contract_unim_balance_0 + bottle_count * bottle_price * DECIMALS)
+        self.assertEqual(filler_balance_1, filler_balance_0 - self.medium_bottle_count * self.full_bottle_prices[pool_number])
+        self.assertEqual(controller_balance_1, controller_balance_0 + self.medium_bottle_count * self.full_bottle_prices[pool_number])
+        # self.assertEqual(filler_unim_balance_1, filler_unim_balance_0 - self.medium_bottle_count * self.medium_bottle_unim_volume)
+        # self.assertEqual(contract_unim_balance_1, contract_unim_balance_0 + self.medium_bottle_count * self.medium_bottle_unim_volume)
         self.assertEqual(filler_inventory_1, [filler_inventory_1[0], filler_inventory_0[pool_number] + self.medium_bottle_count - self.medium_bottle_count_empty, filler_inventory_0[2]])        
     
     def test_fill_large_empty_bottles(self):
         pool_number = 2
-        bottle_price = self.full_bottle_prices[pool_number]
+        filler_account = accounts[1]
 
-        self.unim.mint(accounts[1].address, self.large_bottle_count * bottle_price * DECIMALS, {"from": accounts[0]})
-        self.unim.approve(self.bottler.address, self.large_bottle_count* bottle_price * DECIMALS, {"from": accounts[1]})
-
-        filler_balance_0 = accounts[1].balance()
+        self.unim.mint(filler_account.address, self.large_bottle_count * self.large_bottle_unim_volume, {"from": accounts[0]})
+        self.unim.approve(self.bottler.address, (self.large_bottle_count + self.large_bottle_count_empty) * self.large_bottle_unim_volume, {"from": filler_account})
+        
+        filler_balance_0 = filler_account.balance()
         controller_balance_0 = accounts[0].balance()
-        filler_unim_balance_0 = self.unim.balance_of(accounts[1].address)
+        filler_unim_balance_0 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_0 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(accounts[1].address))
+        filler_inventory_0 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        # Fill bottles with value `bottle_count`
-        self.bottler.fill_bottles(pool_number, self.large_bottle_count, {"from": accounts[1], "value": self.large_bottle_count * bottle_price})
-        # Empty bottles with value `empty_bottle_count`
-        self.bottler.empty_bottles(pool_number, self.large_bottle_count_empty, {"from": accounts[1]})
+        # print(filler_account.balance(), accounts[0].balance(), self.unim.balance_of(filler_account.address), self.unim.balance_of(self.bottler.address), list(self.bottler.get_full_bottle_inventory(filler_account.address)))
+
+        # Fill bottles
+        self.bottler.fill_bottles(pool_number, self.large_bottle_count, {"from": filler_account, "value": self.large_bottle_count * self.full_bottle_prices[pool_number]})
+        # Empty bottles
+        self.bottler.empty_bottles(pool_number, self.large_bottle_count_empty, {"from": filler_account})
         # Fill empty bottles back
-        self.bottler.fill_empty_bottles(pool_number, self.large_bottle_count_empty, {"from": accounts[1]})
+        self.bottler.fill_empty_bottles(pool_number, self.large_bottle_count_empty, {"from": filler_account})
 
-        filler_balance_1 = accounts[1].balance()
+        filler_balance_1 = filler_account.balance()
         controller_balance_1 = accounts[0].balance()
-        filler_unim_balance_1 = self.unim.balance_of(accounts[1].address)
+        filler_unim_balance_1 = self.unim.balance_of(filler_account.address)
         contract_unim_balance_1 = self.unim.balance_of(self.bottler.address)
-        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(accounts[1].address))
+        filler_inventory_1 = list(self.bottler.get_full_bottle_inventory(filler_account.address))
 
-        self.assertEqual(filler_balance_1, filler_balance_0 - self.large_bottle_count * bottle_price)
-        self.assertEqual(controller_balance_1, controller_balance_0 + self.large_bottle_count * bottle_price)
+        self.assertEqual(filler_balance_1, filler_balance_0 - self.large_bottle_count * self.full_bottle_prices[pool_number])
+        self.assertEqual(controller_balance_1, controller_balance_0 + self.large_bottle_count * self.full_bottle_prices[pool_number])
         # self.assertEqual(filler_unim_balance_1, filler_unim_balance_0 - bottle_count * bottle_price * DECIMALS)
         # self.assertEqual(contract_unim_balance_1, contract_unim_balance_0 + bottle_count * bottle_price * DECIMALS)
         self.assertEqual(filler_inventory_1, [*filler_inventory_1[0:pool_number], filler_inventory_0[pool_number] + self.large_bottle_count])        

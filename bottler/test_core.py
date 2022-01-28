@@ -84,11 +84,16 @@ class BottlerTestCase(BottlerDeploymentTestCase):
         cls.full_bottle_prices = [1*DECIMALS, 4*DECIMALS, 24*DECIMALS]
         bottler.set_full_bottle_prices(cls.full_bottle_prices, {"from": accounts[0]})
 
+        # Set variables for tests
         cls.small_bottle_count = 4
         cls.medium_bottle_count = 4
         cls.medium_bottle_count_empty = 2
         cls.large_bottle_count = 4
         cls.large_bottle_count_empty = 2
+
+        cls.small_bottle_unim_volume = cls.bottler.get_volume_by_index(0)
+        cls.medium_bottle_unim_volume = cls.bottler.get_volume_by_index(1)
+        cls.large_bottle_unim_volume = cls.bottler.get_volume_by_index(2)
 
     def test_contract_setup(self):
         prices = self.bottler.get_full_bottle_prices()
