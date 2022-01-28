@@ -84,6 +84,12 @@ class BottlerTestCase(BottlerDeploymentTestCase):
         cls.full_bottle_prices = [1*DECIMALS, 4*DECIMALS, 24*DECIMALS]
         bottler.set_full_bottle_prices(cls.full_bottle_prices, {"from": accounts[0]})
 
+        cls.small_bottle_count = 4
+        cls.medium_bottle_count = 4
+        cls.medium_bottle_count_empty = 2
+        cls.large_bottle_count = 4
+        cls.large_bottle_count_empty = 2
+
     def test_contract_setup(self):
         prices = self.bottler.get_full_bottle_prices()
         self.assertListEqual(list(prices), self.full_bottle_prices)
