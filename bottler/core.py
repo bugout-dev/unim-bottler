@@ -209,20 +209,20 @@ def gogogo(owner_address: str, transaction_config: Dict[str, Any]) -> Dict[str, 
         return result
     result["attached"].append("OwnershipFacet")
 
-    try:
-        facet_cut(
-            diamond.address,
-            "BottlerFacet",
-            bottler_facet.address,
-            "add",
-            transaction_config,
-            initializer_address=bottler_initializer.address,
-        )
-    except Exception as e:
-        print(e)
-        result["error"] = "Failed to attach BottlerFacet"
-        return result
-    result["attached"].append("BottlerFacet")
+    # try:
+    #     facet_cut(
+    #         diamond.address,
+    #         "BottlerFacet",
+    #         bottler_facet.address,
+    #         "add",
+    #         transaction_config,
+    #         initializer_address=bottler_initializer.address,
+    #     )
+    # except Exception as e:
+    #     print(e)
+    #     result["error"] = "Failed to attach BottlerFacet"
+    #     return result
+    # result["attached"].append("BottlerFacet")
 
     return result
 

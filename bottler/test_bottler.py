@@ -28,13 +28,14 @@ class TestDeployment(BottlerSingleContractTestCase):
 
         diamond_bottler = BottlerFacet.BottlerFacet(diamond_address)
 
-        controller = diamond_bottler.terminus_controller()
+        controller = diamond_bottler.bottler_controller()
         self.assertEqual(controller, accounts[0].address)
 
 
 class TestGetFullBottlePoolIds(BottlerTestCase):
     def test_get_full_bottler_pool_ids(self):
         bottler_diamond_address = self.bottler_contracts["Diamond"]
+        print(bottler_diamond_address)
         diamond_bottler = BottlerFacet.BottlerFacet(bottler_diamond_address)
 
         pool_ids = diamond_bottler.get_full_bottle_pool_ids()

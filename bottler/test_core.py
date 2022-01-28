@@ -23,6 +23,8 @@ class BottlerTestCase(BottlerSingleContractTestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
 
+        cls.bottler_contracts = gogogo(accounts[0], {"from": accounts[0]})
+
         # Deploy Bottler
         initializer = BottlerInitializer.BottlerInitializer(None)
         initializer.deploy({"from": accounts[0]})
