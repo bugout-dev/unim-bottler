@@ -309,6 +309,9 @@ def add_default_arguments(parser: argparse.ArgumentParser, transact: bool) -> No
     parser.add_argument(
         "--nonce", type=int, default=None, help="Nonce for the transaction (optional)"
     )
+    parser.add_argument(
+        "--value", default=None, help="Value of the transaction in wei(optional)"
+    )
 
 
 def handle_deploy(args: argparse.Namespace) -> None:
