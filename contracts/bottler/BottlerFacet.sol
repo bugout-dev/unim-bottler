@@ -118,22 +118,13 @@ contract BottlerFacet is ERC1155Holder {
         terminus.mint(msg.sender, fullBottlePoolId, bottlesCount, "");
     }
 
-    function fillEmptyBottles(uint256 poolIndex, uint256 bottlesCount)
-        public
-        payable
-    {
+    function fillEmptyBottles(uint256 poolIndex, uint256 bottlesCount) public {
         LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
 
         uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
         require(
             amount > 0,
             "BottlerFacet:fillEmptyBottles - This pool does not exist"
-        );
-
-        uint256 totalPrice = bottlesCount * bs.fullBottlePrices[poolIndex];
-        require(
-            msg.value >= totalPrice,
-            "BottlerFacet:fillEmptyBottles - Not enough value sent in transaction"
         );
 
         TerminusFacet terminus = getTerminusContract();
