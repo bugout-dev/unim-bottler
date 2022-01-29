@@ -12,7 +12,7 @@ export interface BottleType {
   // TODO(zomglings): Rename to poolIndex. It is too easy to confuse poolId as referring to the Terminus
   // pool ID.
   poolId: number;
-  weiPrice: number;
+  weiPrice: string;
 }
 export interface BottleTypes {
   small: BottleType;
@@ -27,7 +27,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png",
     poolId: 0,
-    weiPrice: 100000000000000000,
+    weiPrice: "100000000000000000",
   },
   medium: {
     volume: process.env.NODE_ENV !== "development" ? 2500 : 5000,
@@ -35,7 +35,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/medium_um.png",
     poolId: 1,
-    weiPrice: 400000000000000000,
+    weiPrice: "400000000000000000",
   },
   large: {
     volume: process.env.NODE_ENV !== "development" ? 50000 : 50000,
@@ -43,7 +43,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/large_um.png",
     poolId: 2,
-    weiPrice: 2400000000000000000,
+    weiPrice: "2400000000000000000",
   },
 };
 

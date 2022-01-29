@@ -148,7 +148,11 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
               fillMethod.send(
                 props.bottle.poolId,
                 web3Provider.web3.utils.toBN(numberOfBottles),
-                { value: props.refill ? 0 : props.bottle.weiPrice }
+                {
+                  value: props.refill
+                    ? 0
+                    : web3Provider.web3.utils.toBN(props.bottle.weiPrice),
+                }
               )
             }
           >
