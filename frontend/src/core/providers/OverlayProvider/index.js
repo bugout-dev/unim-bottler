@@ -181,6 +181,7 @@ const OverlayProvider = ({ children }) => {
             borderTopRadius="48px"
             h="96px"
             boxShadow={"lg"}
+            textAlign={"center"}
           >
             {modal.type === MODAL_TYPES.NEW_SUBSCRIPTON &&
               "Subscribe to a new address"}
@@ -196,7 +197,7 @@ const OverlayProvider = ({ children }) => {
           </ModalHeader>
           {modal.type !== MODAL_TYPES.FILL_BOTTLE &&
             modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}
-          <ModalCloseButton />
+          <ModalCloseButton mr={2} />
           <ModalBody
             zIndex={100002}
             bgColor={
