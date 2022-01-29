@@ -17,7 +17,6 @@ import {
   ButtonGroup,
   Button,
   Badge,
-  Stack,
 } from "@chakra-ui/react";
 import UIContext from "../core/providers/UIProvider/context";
 import React from "react";
@@ -27,7 +26,7 @@ import {
   ArrowRightIcon,
   LockIcon,
 } from "@chakra-ui/icons";
-import { MdSettings, MdDashboard, MdTimeline } from "react-icons/md";
+import { MdSettings, MdTimeline } from "react-icons/md";
 import {
   WHITE_LOGO_W_TEXT_URL,
   ALL_NAV_PATHES,
@@ -35,7 +34,6 @@ import {
   COPYRIGHT_NAME,
 } from "../core/constants";
 import { v4 } from "uuid";
-import useDashboard from "../core/hooks/useDashboard";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import moment from "moment";

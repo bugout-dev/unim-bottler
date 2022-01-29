@@ -194,7 +194,8 @@ const OverlayProvider = ({ children }) => {
             {modal.type === MODAL_TYPES.POUR_BOTTLE &&
               `Open ${modal.props.bottle.name} bottles with UNIML`}
           </ModalHeader>
-          {modal.type !== MODAL_TYPES.FILL_BOTTLE && modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}
+          {modal.type !== MODAL_TYPES.FILL_BOTTLE &&
+            modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}
           <ModalCloseButton />
           <ModalBody
             zIndex={100002}

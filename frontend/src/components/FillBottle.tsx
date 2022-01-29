@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { useContext } from "react";
 import {
   Image,
   Center,
@@ -10,7 +10,6 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  useToast,
 } from "@chakra-ui/react";
 import { BOTTLER_ADDRESS, MILK_ADDRESS } from "../AppDefintions";
 import Web3Context, { txStatus } from "../core/providers/Web3Provider/context";
@@ -21,7 +20,6 @@ import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
 const FillBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
-  const toast = useToast();
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
@@ -50,13 +48,13 @@ const FillBottle = (props: { bottle: BottleType }) => {
     setValueToApprove(
       needsApproval ? requiredMilk - Number(bottler.allowance) : 0
     );
-  }, [bottler.allowance, numberOfBottles]);
+  }, [bottler.allowance, numberOfBottles, requiredMilk]);
 
   React.useEffect(() => {
     if (bottler.approveSpendMilk.status === txStatus.ERROR) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.approveSpendMilk.status]);
+  }, [bottler.approveSpendMilk.status, toggleModal]);
 
   React.useEffect(() => {
     if (
@@ -65,7 +63,7 @@ const FillBottle = (props: { bottle: BottleType }) => {
     ) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.fillBottles.status]);
+  }, [bottler.fillBottles.status, toggleModal]);
 
   return (
     <Center>
@@ -140,7 +138,9 @@ const FillBottle = (props: { bottle: BottleType }) => {
             variant="solid"
             onClick={() =>
               // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
-              bottler.fillBottles.send(web3Provider.web3.utils.toBN(numberOfBottles))
+              bottler.fillBottles.send(
+                web3Provider.web3.utils.toBN(numberOfBottles)
+              )
             }
           >
             Submit

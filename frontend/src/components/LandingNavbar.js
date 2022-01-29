@@ -8,7 +8,6 @@ import {
   Link,
   IconButton,
   Flex,
-  Icon,
   Badge,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { useContext } from "react";
 import {
   Image,
   Center,
@@ -10,10 +10,9 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  useToast,
 } from "@chakra-ui/react";
 import { BOTTLER_ADDRESS, MILK_ADDRESS } from "../AppDefintions";
-import Web3Context, { txStatus } from "../core/providers/Web3Provider/context";
+import { txStatus } from "../core/providers/Web3Provider/context";
 import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
 import overlayContext from "../core/providers/OverlayProvider/context";
@@ -21,12 +20,9 @@ import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
 const PourBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
-  const toast = useToast();
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
-  const requiredMilk = props.bottle.volume * numberOfBottles;
-  const web3Provider = useContext(Web3Context);
   const bottler = useBottler({
     MilkAddress: MILK_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
@@ -35,7 +31,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
         ? chains.matic_mumbai
         : chains.matic,
   });
-  const [valueToApprove, setValueToApprove] = React.useState<number>(0);
 
   React.useEffect(() => {
     const erc20Balance = Number(bottler.erc20Balance);
@@ -45,18 +40,10 @@ const PourBottle = (props: { bottle: BottleType }) => {
   }, [numberOfBottles, props.bottle, bottler.erc20Balance]);
 
   React.useEffect(() => {
-    const needsApproval =
-      Number(bottler.allowance) >= requiredMilk ? false : true;
-    setValueToApprove(
-      needsApproval ? requiredMilk - Number(bottler.allowance) : 0
-    );
-  }, [bottler.allowance, numberOfBottles]);
-
-  React.useEffect(() => {
     if (bottler.approveSpendMilk.status === txStatus.ERROR) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.approveSpendMilk.status]);
+  }, [bottler.approveSpendMilk.status, toggleModal]);
 
   React.useEffect(() => {
     if (
@@ -65,7 +52,7 @@ const PourBottle = (props: { bottle: BottleType }) => {
     ) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.pourFullBottles.status]);
+  }, [bottler.pourFullBottles.status, toggleModal]);
 
   const hasBottles = bottler.fullBottles[props.bottle.poolId];
 

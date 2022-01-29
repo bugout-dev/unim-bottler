@@ -7,12 +7,6 @@ export interface WalletStatesInterface {
   CONNECTED: string;
   WRONG_CHAIN: string;
 }
-export const WALLET_STATES: WalletStatesInterface = {
-  ONBOARD: "Install MetaMask!",
-  CONNECT: "Connect with Metamask",
-  CONNECTED: "Connected",
-  WRONG_CHAIN: "Please select polygon chain in metamask",
-};
 
 export enum txStatus {
   READY = 0,
@@ -23,7 +17,7 @@ export enum txStatus {
 
 export interface Web3ProviderInterface {
   web3: Web3;
-  onConnectWalletClick: VoidFunction;
+  onConnectWalletClick: () => void;
   buttonText: string;
   WALLET_STATES: WalletStatesInterface;
   account: string;
@@ -32,9 +26,16 @@ export interface Web3ProviderInterface {
 
 export interface web3MethodCall {
   status: txStatus;
-  send: <T>(...args: Array<any>) => void;
+  send: (...args: Array<any>) => void;
   data: any;
 }
+
+export const WALLET_STATES: WalletStatesInterface = {
+  ONBOARD: "Install MetaMask!",
+  CONNECT: "Connect with Metamask",
+  CONNECTED: "Connected",
+  WRONG_CHAIN: "Please select polygon chain in metamask",
+};
 
 const Web3Context = createContext<Web3ProviderInterface>({
   web3: new Web3(null),

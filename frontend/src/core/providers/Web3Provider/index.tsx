@@ -1,5 +1,5 @@
 import React from "react";
-import Web3Context, { WALLET_STATES, txStatus } from "./context";
+import Web3Context, { WALLET_STATES } from "./context";
 import Web3 from "web3";
 
 declare global {
@@ -9,10 +9,6 @@ declare global {
   }
 }
 
-// export ChainType
-// {
-
-// }
 export const chains = {
   matic_mumbai: {
     chainId: 80001,
@@ -37,48 +33,14 @@ export const chains = {
   },
 };
 
-export const web3 = new Web3(null);
-
 export const targetChain =
   process.env.NODE_ENV === "development" ? chains.matic_mumbai : chains.matic;
 
 const Web3Provider = ({ children }: { children: JSX.Element }) => {
+  const [web3] = React.useState<Web3>(new Web3(null));
   const [buttonText, setButtonText] = React.useState(WALLET_STATES.ONBOARD);
   const [account, setAccount] = React.useState<string>("");
   const [chainId, setChainId] = React.useState<number | void>();
-
-  const [isReady, setIsReady] = React.useState<boolean>(false);
-  // const [web3] = React.useState<Web3>(new Web3(null));
-
-  const changeChain = async () => {
-    try {
-      await window.ethereum
-        .request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: `0x${targetChain.chainId.toString(16)}` }],
-        })
-        .then(() => web3?.eth.getChainId().then((id) => setChainId(id)));
-    } catch (switchError: any) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: `${targetChain.chainId}`,
-                chainName: targetChain.name,
-                rpcUrls: targetChain.rpcs,
-              },
-            ],
-          });
-        } catch (addError) {
-          // handle "add" error
-        }
-      }
-      // handle other "switch" errors
-    }
-  };
 
   const setWeb3ProviderAsWindowEthereum = async () => {
     let wasSetupSuccess = false;
@@ -116,15 +78,45 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
     }
   };
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (web3.currentProvider) {
       console.log("web3 is getting chain id");
       web3?.eth.getChainId().then((id) => setChainId(id));
     }
-  }, [web3.currentProvider]);
+  }, [web3.currentProvider, web3?.eth]);
 
-  React.useEffect(() => {
-    if (web3.currentProvider) {
+  React.useLayoutEffect(() => {
+    const changeChain = async () => {
+      try {
+        await window.ethereum
+          .request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: `0x${targetChain.chainId.toString(16)}` }],
+          })
+          .then(() => web3?.eth.getChainId().then((id) => setChainId(id)));
+      } catch (switchError: any) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: `${targetChain.chainId}`,
+                  chainName: targetChain.name,
+                  rpcUrls: targetChain.rpcs,
+                },
+              ],
+            });
+          } catch (addError) {
+            // handle "add" error
+          }
+        }
+        // handle other "switch" errors
+      }
+    };
+
+    if (web3.currentProvider && chainId) {
       console.log(
         "Checking that",
         chainId,
@@ -144,37 +136,60 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
         // web3?.eth.getChainId().then(id => setChainId(id))
       }
     }
-  }, [chainId, web3.currentProvider]);
+  }, [chainId, web3.currentProvider, web3?.eth]);
 
-  React.useEffect(() => {
-    const condition = chainId === targetChain.chainId && web3.currentProvider;
-    console.log("trying to call accounts useeffect", condition, chainId);
+  React.useLayoutEffect(() => {
     if (chainId === targetChain.chainId && web3.currentProvider) {
       console.log("web3 is getting users account[0]");
       web3.eth.getAccounts().then((accounts) => setAccount(accounts[0]));
     }
-  }, [chainId, web3.currentProvider]);
+  }, [chainId, web3.currentProvider, web3?.eth]);
 
-  window?.ethereum?.on("chainChanged", (_chainId: any) =>
-    window.location.reload()
-  );
+  window?.ethereum?.on("chainChanged", () => window.location.reload());
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     console.log("updating wallet button status");
-    if (!web3.currentProvider) {
-      if (!window.ethereum) {
-        setButtonText(WALLET_STATES.ONBOARD);
-      } else {
-        setButtonText(WALLET_STATES.CONNECT);
-      }
-    } else {
+
+    if (web3.currentProvider && chainId) {
       if (chainId === targetChain.chainId) {
+        console.log("wallet connected");
         setButtonText(WALLET_STATES.CONNECTED);
       } else {
+        console.log("wallet wrong chain");
         setButtonText(WALLET_STATES.WRONG_CHAIN);
       }
+    } else {
+      if (!window.ethereum) {
+        console.log("wallet onboard");
+        setButtonText(WALLET_STATES.ONBOARD);
+      } else {
+        console.log("wallet connect");
+        setButtonText(WALLET_STATES.CONNECT);
+      }
     }
-  }, [window.ethereum, web3.currentProvider, chainId]);
+
+    // if (!chainId) {
+    //   if (!web3.currentProvider) {
+    //     if (!window.ethereum) {
+    //       console.log("wallet onboard");
+    //       setButtonText(WALLET_STATES.ONBOARD);
+    //     } else {
+    //       console.log("wallet connect");
+    //       setButtonText(WALLET_STATES.CONNECT);
+    //     }
+    //   } else {
+    //     if (chainId === targetChain.chainId) {
+    //       console.log("wallet connected");
+    //       setButtonText(WALLET_STATES.CONNECTED);
+    //     } else {
+    //       console.log("wallet wrong chain");
+    //       setButtonText(WALLET_STATES.WRONG_CHAIN);
+    //     }
+    //   }
+    // } else {
+    //   setButtonText(WALLET_STATES.CONNECT);
+    // }
+  }, [web3.currentProvider, chainId]);
 
   // React.useEffect(())
 

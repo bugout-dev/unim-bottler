@@ -1,12 +1,5 @@
-import {
-  Box,
-  Center,
-  useColorModeValue,
-  Heading,
-  Text,
-  Stack,
-  Image,
-} from "@chakra-ui/react";
+import React from "react";
+import { Box, Center, useColorModeValue, Image } from "@chakra-ui/react";
 
 export default function ProductSimple({ imgUrl }: { imgUrl: string }) {
   return (
@@ -51,7 +44,6 @@ export default function ProductSimple({ imgUrl }: { imgUrl: string }) {
             src={imgUrl}
           />
         </Box>
-
       </Box>
     </Center>
   );

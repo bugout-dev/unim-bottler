@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import DataContext from "./context";
 import { Contract } from "web3-eth-contract";
-import { web3 } from "../Web3Provider";
+import Web3Context from "../Web3Provider/context";
 const erc20abi = require("../../../../abi/erc20.json");
 // const bottlerAbi = require("../../../../abi/BottlerFacetABI.json");
 const bottlerAbi = require("../../../../abi/bottlerAbi.json");
 
 const DataProvider = ({ children }: { children: JSX.Element }) => {
+  const { web3 } = useContext(Web3Context);
   const [erc20Balance, setErc20Balance] = React.useState<string>("0");
   const [allowance, setAllowance] = React.useState<string>("0");
   const [emptyBottles, setEmptyBottles] = React.useState<Array<number>>([]);

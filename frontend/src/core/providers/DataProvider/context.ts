@@ -1,9 +1,9 @@
-import { createContext } from "react";
+import React, { createContext } from "react";
 import { Contract } from "web3-eth-contract";
 const erc20abi = require("../../../../abi/erc20.json");
 // const bottlerAbi = require("../../../../abi/BottlerFacetABI.json");
 const bottlerAbi = require("../../../../abi/bottlerAbi.json");
-import { web3 } from "../Web3Provider/index";
+import Web3 from "web3";
 
 export interface dataContext {
   erc20Balance: string;
@@ -17,6 +17,8 @@ export interface dataContext {
   setEmptyBottles: React.Dispatch<React.SetStateAction<number[]>>;
   setFullBottles: React.Dispatch<React.SetStateAction<number[]>>;
 }
+
+const web3 = new Web3(null);
 
 const DataContext = createContext<dataContext>({
   erc20Balance: "0",

@@ -92,8 +92,7 @@ const Footer = () => (
                 />
               </Link>
             </Box>
-              <Text >This is the way. Milky way.</Text>
-
+            <Text>This is the way. Milky way.</Text>
           </Stack>
           <Text fontSize={"sm"}>
             © {moment().year()} {COPYRIGHT_NAME} All rights reserved

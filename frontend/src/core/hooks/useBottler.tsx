@@ -1,15 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import Web3Context from "../providers/Web3Provider/context";
 import { useToast } from "./";
-import { txStatus, web3MethodCall } from "../providers/Web3Provider/context";
-import { AbiItem } from "web3-utils";
-import { Contract } from "web3-eth-contract";
+import { web3MethodCall } from "../providers/Web3Provider/context";
 import useWeb3MEthodCall from "./useWeb3MethodCall";
-import { useQuery } from "@chakra-ui/react";
 import DataContext from "../providers/DataProvider/context";
-const erc20abi = require("../../../abi/erc20.json");
-// const bottlerAbi = require("../../../abi/BottlerFacetABI.json");
-const bottlerAbi = require("../../../abi/bottlerAbi.json");
 
 export interface BottleType {
   volume: number;
@@ -86,20 +80,17 @@ const useBottler = ({
 
   React.useEffect(() => {
     contract.options.address = MilkAddress;
-  }, [MilkAddress]);
+  }, [MilkAddress, contract.options]);
 
   React.useEffect(() => {
     bottlerContract.options.address = BottlerAddress;
-  }, [BottlerAddress]);
+  }, [BottlerAddress, bottlerContract.options]);
 
-  const syncAccountState = () =>
-  {
+  const syncAccountState = React.useCallback(() => {
     if (
       web3Provider.web3?.utils.isAddress(web3Provider.account) &&
       web3Provider.chainId === targetChain.chainId
     ) {
-      console.log("erc20abi", erc20abi);
-
       console.log("web3Provider.account", web3Provider.account);
       contract.methods
         .balanceOf(`${web3Provider.account}`)
@@ -130,111 +121,66 @@ const useBottler = ({
           setEmptyBottles(emptyBottlesNum);
         });
     }
-  }
+  }, [
+    BottlerAddress,
+    bottlerContract,
+    contract.methods,
+    setAllowance,
+    setEmptyBottles,
+    setErc20Balance,
+    setFullBottles,
+    targetChain,
+    web3Provider.account,
+    web3Provider.web3.utils,
+    web3Provider.chainId,
+  ]);
   const fillBottles = useWeb3MEthodCall({
     name: "fillSmallBottles",
     contract: bottlerContract,
     targetChain: targetChain,
-    onSuccess: () =>
-    {
+    onSuccess: () => {
       toast("Successfully bottled milk!", "success", "Success!!111one");
       syncAccountState();
     },
-    onError: (error) =>
-    {
-      toast(">.< Bottling failed", "error", "FAIL!")
-      console.error(error)
-    }
+    onError: (error) => {
+      toast(">.< Bottling failed", "error", "FAIL!");
+      console.error(error);
+    },
   });
 
   const approveSpendMilk = useWeb3MEthodCall({
     name: "approve",
     contract: contract,
     targetChain: targetChain,
-    onSuccess: () =>
-    {
-      toast("Successfully approved milk!", "success", "Success!")
+    onSuccess: () => {
+      toast("Successfully approved milk!", "success", "Success!");
       syncAccountState();
     },
-    onError: (error) =>
-    {
-      toast(">.< Approval failed", "error", "FAIL!")
-      console.error(error)
-    }
+    onError: (error) => {
+      toast(">.< Approval failed", "error", "FAIL!");
+      console.error(error);
+    },
   });
 
   const pourFullBottles = useWeb3MEthodCall({
     name: "emptySmallBottles",
     contract: bottlerContract,
     targetChain: targetChain,
-    onSuccess: () =>
-    {
-      toast("Successfully opened bottle(s)!", "success", "Success!")
+    onSuccess: () => {
+      toast("Successfully opened bottle(s)!", "success", "Success!");
       syncAccountState();
     },
-    onError: (error) =>
-    {
-      toast(">.< Approval failed", "error", "FAIL!")
-      console.error(error)
-    }
+    onError: (error) => {
+      toast(">.< Approval failed", "error", "FAIL!");
+      console.error(error);
+    },
   });
 
   const toast = useToast();
 
   React.useEffect(() => {
-   syncAccountState();
-  }, [web3Provider.account, web3Provider.chainId]);
-
-  // const pourFullBottles = async (amount: Array<number>) => {
-  //   if (
-  //     web3Provider.web3?.utils.isAddress(web3Provider.account) &&
-  //     web3Provider.chainId === targetChain.chainId
-  //   ) {
-  //     //Todo pourFullBottles is probably wrong method name
-  //     bottlerContract.methods
-  //       .pourFullBottles(amount)
-  //       .send({ from: web3Provider.account })
-  //       .once("receipt", () => {
-  //         bottlerContract.methods
-  //           .getFullBottleInventory(`${web3Provider.account}`)
-  //           .call()
-  //           .then((bottles: Array<string>) => {
-  //             console.log("got full bottles:", bottles);
-  //             const fullBottlesNum = bottles.map((bottle) => Number(bottle));
-  //             setFullBottles(fullBottlesNum);
-  //           });
-  //         bottlerContract.methods
-  //           .getEmptyBottleInventory(`${web3Provider.account}`)
-  //           .call()
-  //           .then((bottles: Array<string>) => {
-  //             console.log("got full bottles:", bottles);
-  //             const emptyBottlesNum = bottles.map((bottle) => Number(bottle));
-  //             setEmptyBottles(emptyBottlesNum);
-  //           });
-  //       });
-  //   }
-  // };
-
-  // React.useEffect(() => {
-  //   switch (submitStatus) {
-  //     case txStatus.ERROR:
-  //   }
-  // }, submitStatus);
-
-  // const __submitFilllBottlesOrder = ({
-  //   amount,
-  //   bottle,
-  // }: {
-  //   amount: number;
-  //   bottle: BottleType;
-  // }) => {
-  //   _submitFilllBottlesOrder.send(amount, bottle.poolId);
-  // };
-
-  // const submitFilllBottlesOrder = {
-  //   ..._submitFilllBottlesOrder,
-  //   send: __submitFilllBottlesOrder,
-  // };
+    syncAccountState();
+  }, [web3Provider.account, web3Provider.chainId, syncAccountState]);
 
   return {
     erc20Balance,
@@ -248,5 +194,3 @@ const useBottler = ({
 };
 
 export default useBottler;
-
-

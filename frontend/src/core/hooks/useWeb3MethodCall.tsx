@@ -1,5 +1,4 @@
 import React from "react";
-import { useToast } from "./";
 import { Contract } from "web3-eth-contract";
 import Web3Context, { txStatus } from "../providers/Web3Provider/context";
 import { useContext } from "react";
@@ -7,16 +6,16 @@ import { useContext } from "react";
 export interface UseWeb3MethodReturns {
   data: any;
   status: txStatus;
-  send: <T>(...args: any[]) => void;
-  call: <T>(...args: any[]) => any;
+  send: (...args: any[]) => void;
+  call: (...args: any[]) => any;
 }
 
 export interface UseWeb3MEthod {
   name: string;
   contract: Contract;
   targetChain: any;
-  onSuccess?: (receipt: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (receipt?: any) => void;
+  onError?: (error?: any) => void;
 }
 
 const useWeb3MEthod = ({
@@ -26,8 +25,6 @@ const useWeb3MEthod = ({
   onSuccess,
   onError,
 }: UseWeb3MEthod): UseWeb3MethodReturns => {
-  const toast = useToast();
-
   const [status, setStatus] = React.useState<txStatus>(txStatus.READY);
   const [data, setData] = React.useState<any>(undefined);
   const web3Provider = useContext(Web3Context);
@@ -69,26 +66,15 @@ const useWeb3MEthod = ({
     ) {
       setStatus(txStatus.LOADING);
       //todo bottle number enum here in args
-      contract.methods[`${name}`](...args)
-        .send({ from: web3Provider.account })
-        .once("receipt", (receipt: any) => {
-          console.log("receipt is:", receipt);
-          if (receipt.status) {
-            setStatus(txStatus.SUCCESS);
-            onSuccess && onSuccess(receipt);
-          } else {
-            console.error("transaction failed");
-            setStatus(txStatus.ERROR);
-            onError && onError(receipt);
+      contract.methods[`${name}`](...args).call(
+        { from: web3Provider.account },
+        (error: any, result: any) => {
+          setData(result);
+          if (error) {
+            onError && onError(error);
           }
-          console.log("small success!");
-        })
-        .once("error", (error: any) => {
-          console.log("transaction was reverted by evm probably");
-          setStatus(txStatus.ERROR);
-          console.log("Seems that EVM reverted transaction");
-          onError && onError(error);
-        });
+        }
+      );
     }
   };
 

@@ -12,20 +12,13 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
-import Web3 from "web3";
-import { provider } from "web3-core";
-import Web3Context from "../src/core/providers/Web3Provider/context";
 import { MILK_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
-const ONBOARD_TEXT = "Click here to install MetaMask!";
-const CONNECT_TEXT = "Connect";
-const CONNECTED_TEXT = "Connected";
 const assets = undefined;
 import { MODAL_TYPES } from "../src/core/providers/OverlayProvider/constants";
 import overlayContext from "../src/core/providers/OverlayProvider/context";
-import ProductSimple from "../src/components/BottleCard";
 import useBottler, { BOTTLE_TYPES } from "../src/core/hooks/useBottler";
 import { targetChain } from "../src/core/providers/Web3Provider";
-import { BottleType, BottleTypes } from "../src/core/hooks/useBottler";
+import { BottleType } from "../src/core/hooks/useBottler";
 import RouteButton from "../src/components/RouteButton";
 import UIContext from "../src/core/providers/UIProvider/context";
 
@@ -59,13 +52,7 @@ const Homepage = () => {
     });
   };
 
-  const handleRefillClick = ({
-    item,
-    qty,
-  }: {
-    item: BottleType;
-    qty?: number;
-  }) => {
+  const handleRefillClick = ({ item }: { item: BottleType }) => {
     overlay.toggleModal({
       type: MODAL_TYPES.FILL_BOTTLE,
       props: { bottle: item },
@@ -182,45 +169,47 @@ const Homepage = () => {
           {isFull ? "Full" : "Empty"} {item.name} bottles: {qty}
         </Text>
         <Spacer />
-        {!isFull && (
-          <Button
-            colorScheme="blue"
-            size="sm"
-            variant={"solid"}
-            onClick={() => {
-              handleRefillClick({ item, qty });
-            }}
-          >
-            Refill
-          </Button>
-        )}
-        {qty > 0 && isFull && (
-          <Button
-            colorScheme="blue"
-            size="sm"
-            variant={"solid"}
-            onClick={() => {
-              handlePourClick({ item, qty });
-            }}
-          >
-            Open
-          </Button>
-        )}
-        {(!isFull || qty > 0) && (
-          <RouteButton
-            isDisabled={qty > 0 ? false : true}
-            size="sm"
-            variant="solid"
-            colorScheme="purple"
-            href="http://opensea.io"
-          >
-            List on opensea
-          </RouteButton>
-        )}
+        <Flex flexWrap={"wrap"}>
+          {!isFull && (
+            <Button
+              colorScheme="blue"
+              size="sm"
+              variant={"solid"}
+              onClick={() => {
+                handleRefillClick({ item });
+              }}
+            >
+              Refill
+            </Button>
+          )}
+          {qty > 0 && isFull && (
+            <Button
+              colorScheme="blue"
+              size="sm"
+              variant={"solid"}
+              onClick={() => {
+                handlePourClick({ item, qty });
+              }}
+            >
+              Open
+            </Button>
+          )}
+          {(!isFull || qty > 0) && (
+            <RouteButton
+              isDisabled={qty > 0 ? false : true}
+              size="sm"
+              variant="solid"
+              colorScheme="purple"
+              href="http://opensea.io"
+            >
+              List on opensea
+            </RouteButton>
+          )}
+        </Flex>
       </Stack>
     );
   };
-  console.log("bottler.erc20Balance", bottler.erc20Balance);
+  console.log("test", Number(bottler.erc20Balance) < BOTTLE_TYPES.small.volume);
   return (
     <>
       <Center w="100%" bgColor="blue.900">
