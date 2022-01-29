@@ -138,3 +138,6 @@ build/
 reports/
 .vscode/
 .secrets/
+.bottler/
+dev.env
+prod.env
