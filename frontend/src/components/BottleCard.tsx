@@ -1,50 +1,95 @@
-import React from "react";
-import { Box, Center, useColorModeValue, Image } from "@chakra-ui/react";
+import React, { useContext } from "react";
+import { Box, Heading, Text, Stack, chakra, Image } from "@chakra-ui/react";
+import { BottleType } from "../core/hooks/useBottler";
+import OverlayContext from "../core/providers/OverlayProvider/context";
+import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
-export default function ProductSimple({ imgUrl }: { imgUrl: string }) {
+const BottleCard = ({
+  bottle,
+  isDisabled,
+}: {
+  bottle: BottleType;
+  isDisabled: boolean;
+}) => {
+  const overlay = useContext(OverlayContext);
+  const handleCardClick = (bottle: BottleType) => {
+    console.log(bottle.name);
+    overlay.toggleModal({
+      type: MODAL_TYPES.FILL_BOTTLE,
+      props: { bottle: bottle },
+    });
+  };
+
   return (
-    <Center py={12}>
+    <Box
+      onClick={isDisabled ? undefined : () => handleCardClick(bottle)}
+      borderRadius="xl"
+      boxShadow={"lg"}
+      w="240px"
+      h="360px"
+      bgColor="purple.900"
+      backgroundBlendMode={"darken"}
+      transition="0.2s"
+      _hover={{ transform: "scale(1.05)", transition: "0.1s" }}
+      position={"relative"}
+      my={4}
+      mx={4}
+    >
       <Box
-        role={"group"}
-        p={6}
-        maxW={"330px"}
-        w={"full"}
-        bg={useColorModeValue("white", "gray.800")}
-        boxShadow={"2xl"}
-        rounded={"lg"}
-        pos={"relative"}
-        zIndex={1}
+        borderRadius={"xl"}
+        position="relative"
+        top="0"
+        left="0"
+        h="360px"
+        w="240px"
+        backgroundColor={isDisabled ? "rgba(128,128,128,1)" : "inherit"}
       >
-        <Box
-          rounded={"lg"}
-          mt={-12}
-          pos={"relative"}
-          height={"230px"}
-          _after={{
-            transition: "all .3s ease",
-            content: '""',
-            w: "full",
-            h: "full",
-            pos: "absolute",
-            top: 5,
-            left: 0,
-            zIndex: -1,
-          }}
-          _groupHover={{
-            _after: {
-              filter: "blur(20px)",
-            },
-          }}
-        >
-          <Image
-            rounded={"lg"}
-            height={230}
-            width={282}
-            objectFit={"cover"}
-            src={imgUrl}
-          />
-        </Box>
+        {isDisabled && (
+          <Heading
+            textColor={"gray.300"}
+            w="100%"
+            transform="rotate(45deg)"
+            position={"absolute"}
+            zIndex={100}
+            top="20%"
+            right="-15%"
+            fontSize="49px"
+          >
+            Not enough milk
+          </Heading>
+        )}
+        <Image
+          borderRadius="49px"
+          h="280px"
+          w="280px"
+          // bgColor="red"
+          src={bottle.imageUrl}
+          filter={isDisabled ? "brightness(30%)" : "inherit"}
+        />
+        <Stack pt={4} align={"center"}>
+          <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
+            {bottle.name} bottle
+          </Text>
+
+          <Stack direction={"row"} align={"center"}>
+            <Text fontWeight={800} fontSize={"xl"}>
+              ({bottle.volume} UNIM)
+            </Text>
+          </Stack>
+        </Stack>
+        <chakra.span
+          alignSelf={"center"}
+          h="80px"
+          placeSelf={"center"}
+          fontSize={"md"}
+          fontWeight={600}
+          px="22px"
+          textTransform={"capitalize"}
+          wordBreak={"break-word"}
+          whiteSpace={"nowrap"}
+        ></chakra.span>
       </Box>
-    </Center>
+    </Box>
   );
-}
+};
+export default BottleCard;
