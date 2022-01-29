@@ -110,12 +110,12 @@ const Homepage = () => {
                 qty={bottler.emptyBottles[0]}
               />
               <InventoryItem
-                item={BOTTLE_TYPES.small}
+                item={BOTTLE_TYPES.medium}
                 isFull={false}
                 qty={bottler.emptyBottles[1]}
               />
               <InventoryItem
-                item={BOTTLE_TYPES.small}
+                item={BOTTLE_TYPES.large}
                 isFull={false}
                 qty={bottler.emptyBottles[2]}
               />
