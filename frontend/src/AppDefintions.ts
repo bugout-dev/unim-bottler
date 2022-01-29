@@ -1,4 +1,4 @@
-export const MILK_ADDRESS =
+export const UNIM_ADDRESS =
   process.env.NEXT_PUBLIC_UNIMLK_ADDRESS ??
   "not defined NEXT_PUBLIC_UNIMLK_ADDRESS";
 export const BOTTLER_ADDRESS =
