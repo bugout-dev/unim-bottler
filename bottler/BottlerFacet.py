@@ -114,29 +114,25 @@ class BottlerFacet:
         self.assert_contract_is_instantiated()
         return self.contract.drainERC20(token_address, transaction_config)
 
-    def empty_large_bottles(self, bottles_count: int, transaction_config) -> Any:
+    def empty_bottles(
+        self, pool_index: int, bottles_count: int, transaction_config
+    ) -> Any:
         self.assert_contract_is_instantiated()
-        return self.contract.emptyLargeBottles(bottles_count, transaction_config)
+        return self.contract.emptyBottles(pool_index, bottles_count, transaction_config)
 
-    def empty_medium_bottles(self, bottles_count: int, transaction_config) -> Any:
+    def fill_bottles(
+        self, pool_index: int, bottles_count: int, transaction_config
+    ) -> Any:
         self.assert_contract_is_instantiated()
-        return self.contract.emptyMediumBottles(bottles_count, transaction_config)
+        return self.contract.fillBottles(pool_index, bottles_count, transaction_config)
 
-    def empty_small_bottles(self, bottles_count: int, transaction_config) -> Any:
+    def fill_empty_bottles(
+        self, pool_index: int, bottles_count: int, transaction_config
+    ) -> Any:
         self.assert_contract_is_instantiated()
-        return self.contract.emptySmallBottles(bottles_count, transaction_config)
-
-    def fill_large_bottles(self, bottles_count: int, transaction_config) -> Any:
-        self.assert_contract_is_instantiated()
-        return self.contract.fillLargeBottles(bottles_count, transaction_config)
-
-    def fill_medium_bottles(self, bottles_count: int, transaction_config) -> Any:
-        self.assert_contract_is_instantiated()
-        return self.contract.fillMediumBottles(bottles_count, transaction_config)
-
-    def fill_small_bottles(self, bottles_count: int, transaction_config) -> Any:
-        self.assert_contract_is_instantiated()
-        return self.contract.fillSmallBottles(bottles_count, transaction_config)
+        return self.contract.fillEmptyBottles(
+            pool_index, bottles_count, transaction_config
+        )
 
     def get_bottle_capacities(self) -> Any:
         self.assert_contract_is_instantiated()
@@ -161,6 +157,10 @@ class BottlerFacet:
     def get_full_bottle_pool_ids(self) -> Any:
         self.assert_contract_is_instantiated()
         return self.contract.getFullBottlePoolIds.call()
+
+    def get_full_bottle_prices(self) -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.getFullBottlePrices.call()
 
     def get_full_bottle_supplies(self) -> Any:
         self.assert_contract_is_instantiated()
@@ -229,6 +229,10 @@ class BottlerFacet:
         return self.contract.setFullBottlePoolIds(
             new_full_bottle_pool_ids, transaction_config
         )
+
+    def set_full_bottle_prices(self, prices: List, transaction_config) -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.setFullBottlePrices(prices, transaction_config)
 
     def set_up(
         self,
@@ -358,62 +362,38 @@ def handle_drain_erc20(args: argparse.Namespace) -> None:
     print(result)
 
 
-def handle_empty_large_bottles(args: argparse.Namespace) -> None:
+def handle_empty_bottles(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = BottlerFacet(args.address)
     transaction_config = get_transaction_config(args)
-    result = contract.empty_large_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
+    result = contract.empty_bottles(
+        pool_index=args.pool_index,
+        bottles_count=args.bottles_count,
+        transaction_config=transaction_config,
     )
     print(result)
 
 
-def handle_empty_medium_bottles(args: argparse.Namespace) -> None:
+def handle_fill_bottles(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = BottlerFacet(args.address)
     transaction_config = get_transaction_config(args)
-    result = contract.empty_medium_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
+    result = contract.fill_bottles(
+        pool_index=args.pool_index,
+        bottles_count=args.bottles_count,
+        transaction_config=transaction_config,
     )
     print(result)
 
 
-def handle_empty_small_bottles(args: argparse.Namespace) -> None:
+def handle_fill_empty_bottles(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = BottlerFacet(args.address)
     transaction_config = get_transaction_config(args)
-    result = contract.empty_small_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
-    )
-    print(result)
-
-
-def handle_fill_large_bottles(args: argparse.Namespace) -> None:
-    network.connect(args.network)
-    contract = BottlerFacet(args.address)
-    transaction_config = get_transaction_config(args)
-    result = contract.fill_large_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
-    )
-    print(result)
-
-
-def handle_fill_medium_bottles(args: argparse.Namespace) -> None:
-    network.connect(args.network)
-    contract = BottlerFacet(args.address)
-    transaction_config = get_transaction_config(args)
-    result = contract.fill_medium_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
-    )
-    print(result)
-
-
-def handle_fill_small_bottles(args: argparse.Namespace) -> None:
-    network.connect(args.network)
-    contract = BottlerFacet(args.address)
-    transaction_config = get_transaction_config(args)
-    result = contract.fill_small_bottles(
-        bottles_count=args.bottles_count, transaction_config=transaction_config
+    result = contract.fill_empty_bottles(
+        pool_index=args.pool_index,
+        bottles_count=args.bottles_count,
+        transaction_config=transaction_config,
     )
     print(result)
 
@@ -457,6 +437,13 @@ def handle_get_full_bottle_pool_ids(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = BottlerFacet(args.address)
     result = contract.get_full_bottle_pool_ids()
+    print(result)
+
+
+def handle_get_full_bottle_prices(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = BottlerFacet(args.address)
+    result = contract.get_full_bottle_prices()
     print(result)
 
 
@@ -551,6 +538,16 @@ def handle_set_full_bottle_pool_ids(args: argparse.Namespace) -> None:
     print(result)
 
 
+def handle_set_full_bottle_prices(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = BottlerFacet(args.address)
+    transaction_config = get_transaction_config(args)
+    result = contract.set_full_bottle_prices(
+        prices=args.prices, transaction_config=transaction_config
+    )
+    print(result)
+
+
 def handle_set_up(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = BottlerFacet(args.address)
@@ -624,47 +621,35 @@ def generate_cli() -> argparse.ArgumentParser:
     )
     drain_erc20_parser.set_defaults(func=handle_drain_erc20)
 
-    empty_large_bottles_parser = subcommands.add_parser("empty-large-bottles")
-    add_default_arguments(empty_large_bottles_parser, True)
-    empty_large_bottles_parser.add_argument(
+    empty_bottles_parser = subcommands.add_parser("empty-bottles")
+    add_default_arguments(empty_bottles_parser, True)
+    empty_bottles_parser.add_argument(
+        "--pool-index", required=True, help="Type: uint256", type=int
+    )
+    empty_bottles_parser.add_argument(
         "--bottles-count", required=True, help="Type: uint256", type=int
     )
-    empty_large_bottles_parser.set_defaults(func=handle_empty_large_bottles)
+    empty_bottles_parser.set_defaults(func=handle_empty_bottles)
 
-    empty_medium_bottles_parser = subcommands.add_parser("empty-medium-bottles")
-    add_default_arguments(empty_medium_bottles_parser, True)
-    empty_medium_bottles_parser.add_argument(
+    fill_bottles_parser = subcommands.add_parser("fill-bottles")
+    add_default_arguments(fill_bottles_parser, True)
+    fill_bottles_parser.add_argument(
+        "--pool-index", required=True, help="Type: uint256", type=int
+    )
+    fill_bottles_parser.add_argument(
         "--bottles-count", required=True, help="Type: uint256", type=int
     )
-    empty_medium_bottles_parser.set_defaults(func=handle_empty_medium_bottles)
+    fill_bottles_parser.set_defaults(func=handle_fill_bottles)
 
-    empty_small_bottles_parser = subcommands.add_parser("empty-small-bottles")
-    add_default_arguments(empty_small_bottles_parser, True)
-    empty_small_bottles_parser.add_argument(
+    fill_empty_bottles_parser = subcommands.add_parser("fill-empty-bottles")
+    add_default_arguments(fill_empty_bottles_parser, True)
+    fill_empty_bottles_parser.add_argument(
+        "--pool-index", required=True, help="Type: uint256", type=int
+    )
+    fill_empty_bottles_parser.add_argument(
         "--bottles-count", required=True, help="Type: uint256", type=int
     )
-    empty_small_bottles_parser.set_defaults(func=handle_empty_small_bottles)
-
-    fill_large_bottles_parser = subcommands.add_parser("fill-large-bottles")
-    add_default_arguments(fill_large_bottles_parser, True)
-    fill_large_bottles_parser.add_argument(
-        "--bottles-count", required=True, help="Type: uint256", type=int
-    )
-    fill_large_bottles_parser.set_defaults(func=handle_fill_large_bottles)
-
-    fill_medium_bottles_parser = subcommands.add_parser("fill-medium-bottles")
-    add_default_arguments(fill_medium_bottles_parser, True)
-    fill_medium_bottles_parser.add_argument(
-        "--bottles-count", required=True, help="Type: uint256", type=int
-    )
-    fill_medium_bottles_parser.set_defaults(func=handle_fill_medium_bottles)
-
-    fill_small_bottles_parser = subcommands.add_parser("fill-small-bottles")
-    add_default_arguments(fill_small_bottles_parser, True)
-    fill_small_bottles_parser.add_argument(
-        "--bottles-count", required=True, help="Type: uint256", type=int
-    )
-    fill_small_bottles_parser.set_defaults(func=handle_fill_small_bottles)
+    fill_empty_bottles_parser.set_defaults(func=handle_fill_empty_bottles)
 
     get_bottle_capacities_parser = subcommands.add_parser("get-bottle-capacities")
     add_default_arguments(get_bottle_capacities_parser, False)
@@ -705,6 +690,10 @@ def generate_cli() -> argparse.ArgumentParser:
     get_full_bottle_pool_ids_parser = subcommands.add_parser("get-full-bottle-pool-ids")
     add_default_arguments(get_full_bottle_pool_ids_parser, False)
     get_full_bottle_pool_ids_parser.set_defaults(func=handle_get_full_bottle_pool_ids)
+
+    get_full_bottle_prices_parser = subcommands.add_parser("get-full-bottle-prices")
+    add_default_arguments(get_full_bottle_prices_parser, False)
+    get_full_bottle_prices_parser.set_defaults(func=handle_get_full_bottle_prices)
 
     get_full_bottle_supplies_parser = subcommands.add_parser("get-full-bottle-supplies")
     add_default_arguments(get_full_bottle_supplies_parser, False)
@@ -787,6 +776,13 @@ def generate_cli() -> argparse.ArgumentParser:
         "--new-full-bottle-pool-ids", required=True, help="Type: uint256[3]", nargs="+"
     )
     set_full_bottle_pool_ids_parser.set_defaults(func=handle_set_full_bottle_pool_ids)
+
+    set_full_bottle_prices_parser = subcommands.add_parser("set-full-bottle-prices")
+    add_default_arguments(set_full_bottle_prices_parser, True)
+    set_full_bottle_prices_parser.add_argument(
+        "--prices", required=True, help="Type: uint256[3]", nargs="+"
+    )
+    set_full_bottle_prices_parser.set_defaults(func=handle_set_full_bottle_prices)
 
     set_up_parser = subcommands.add_parser("set-up")
     add_default_arguments(set_up_parser, True)

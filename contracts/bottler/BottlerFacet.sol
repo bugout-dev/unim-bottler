@@ -45,6 +45,16 @@ contract BottlerFacet is ERC1155Holder {
         bs.emptyBottlePoolIds = emptyBottlePoolIds;
     }
 
+    function getFullBottlePrices() external view returns (uint256[3] memory) {
+        return LibBottler.bottlerStorage().fullBottlePrices;
+    }
+
+    function setFullBottlePrices(uint256[3] memory prices) external {
+        LibBottler.enforceIsController();
+        LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
+        bs.fullBottlePrices = prices;
+    }
+
     function getTerminusContract() internal view returns (TerminusFacet) {
         address terminusAddress = LibBottler.bottlerStorage().terminusAddress;
         TerminusFacet terminus = TerminusFacet(terminusAddress);
@@ -71,20 +81,28 @@ contract BottlerFacet is ERC1155Holder {
         }
     }
 
-    function fillBottles(uint256 poolIndex, uint256 bottlesCount) internal {
+    function fillBottles(uint256 poolIndex, uint256 bottlesCount)
+        external
+        payable
+    {
         LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
-        uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
 
+        uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
         require(
             amount > 0,
             "BottlerFacet:fillBottles - This pool does not exist"
+        );
+
+        uint256 totalPrice = bottlesCount * bs.fullBottlePrices[poolIndex];
+        require(
+            msg.value >= totalPrice,
+            "BottlerFacet:fillBottles - Not enough value sent in transaction"
         );
 
         TerminusFacet terminus = getTerminusContract();
         uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
         uint256 emptyBottlePoolId = bs.emptyBottlePoolIds[poolIndex];
 
-        //
         require(
             terminus.terminusPoolSupply(fullBottlePoolId) +
                 terminus.terminusPoolSupply(emptyBottlePoolId) +
@@ -96,19 +114,55 @@ contract BottlerFacet is ERC1155Holder {
         IERC20 unim = getUnimContract();
         unim.transferFrom(msg.sender, address(this), amount);
 
+        payable(bs.controller).transfer(totalPrice);
         terminus.mint(msg.sender, fullBottlePoolId, bottlesCount, "");
     }
 
-    function fillSmallBottles(uint256 bottlesCount) external {
-        fillBottles(0, bottlesCount);
+    function fillEmptyBottles(uint256 poolIndex, uint256 bottlesCount) public {
+        LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
+
+        uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
+        require(
+            amount > 0,
+            "BottlerFacet:fillEmptyBottles - This pool does not exist"
+        );
+
+        TerminusFacet terminus = getTerminusContract();
+        uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
+        uint256 emptyBottlePoolId = bs.emptyBottlePoolIds[poolIndex];
+
+        require(
+            terminus.balanceOf(msg.sender, emptyBottlePoolId) >= bottlesCount,
+            "BottlerFacet:fillEmptyBottles - Sender does not have enough empty bottles"
+        );
+
+        IERC20 unim = getUnimContract();
+        unim.transferFrom(msg.sender, address(this), amount);
+        terminus.mint(msg.sender, fullBottlePoolId, bottlesCount, "");
+        terminus.burn(msg.sender, emptyBottlePoolId, bottlesCount);
     }
 
-    function fillMediumBottles(uint256 bottlesCount) external {
-        fillBottles(1, bottlesCount);
-    }
+    function emptyBottles(uint256 poolIndex, uint256 bottlesCount) external {
+        LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
 
-    function fillLargeBottles(uint256 bottlesCount) external {
-        fillBottles(2, bottlesCount);
+        uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
+
+        TerminusFacet terminus = getTerminusContract();
+        IERC20 unim = getUnimContract();
+
+        require(
+            unim.balanceOf(address(this)) >= amount,
+            "Cotract ran out of UNIM, it cannot happen"
+        );
+
+        uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
+        uint256 emptyBottlePoolId = bs.emptyBottlePoolIds[poolIndex];
+
+        terminus.burn(msg.sender, fullBottlePoolId, bottlesCount);
+
+        terminus.mint(msg.sender, emptyBottlePoolId, bottlesCount, "");
+
+        unim.transfer(msg.sender, amount);
     }
 
     function getBottleCapacities() external view returns (uint256[3] memory) {
@@ -202,41 +256,6 @@ contract BottlerFacet is ERC1155Holder {
             );
         }
         return emptyBottleInventory;
-    }
-
-    function emptyBottles(uint256 poolIndex, uint256 bottlesCount) internal {
-        LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
-
-        uint256 amount = getVolumeByIndex(poolIndex) * bottlesCount;
-
-        TerminusFacet terminus = getTerminusContract();
-        IERC20 unim = getUnimContract();
-
-        require(
-            unim.balanceOf(address(this)) >= amount,
-            "Cotract ran out of UNIM, it cannot happen"
-        );
-
-        uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
-        uint256 emptyBottlePoolId = bs.emptyBottlePoolIds[poolIndex];
-
-        terminus.burn(msg.sender, fullBottlePoolId, bottlesCount);
-
-        terminus.mint(msg.sender, emptyBottlePoolId, bottlesCount, "");
-
-        unim.transfer(msg.sender, amount);
-    }
-
-    function emptySmallBottles(uint256 bottlesCount) external {
-        emptyBottles(0, bottlesCount);
-    }
-
-    function emptyMediumBottles(uint256 bottlesCount) external {
-        emptyBottles(1, bottlesCount);
-    }
-
-    function emptyLargeBottles(uint256 bottlesCount) external {
-        emptyBottles(2, bottlesCount);
     }
 
     function getUnimAddress() external view returns (address) {

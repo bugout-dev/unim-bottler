@@ -16,6 +16,7 @@ library LibBottler {
         uint256[3] fullBottlePoolIds;
         uint256[3] emptyBottlePoolIds;
         uint256[3] bottleCapacities;
+        uint256[3] fullBottlePrices;
     }
 
     function bottlerStorage()
