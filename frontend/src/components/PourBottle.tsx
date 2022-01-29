@@ -11,7 +11,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { BOTTLER_ADDRESS, MILK_ADDRESS } from "../AppDefintions";
+import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
 import { txStatus } from "../core/providers/Web3Provider/context";
 import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
@@ -24,7 +24,7 @@ const PourBottle = (props: { bottle: BottleType }) => {
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
   const bottler = useBottler({
-    MilkAddress: MILK_ADDRESS,
+    MilkAddress: UNIM_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
     targetChain:
       process.env.NODE_ENV === "development"

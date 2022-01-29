@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Stack, Heading, Center, Flex } from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
-import { MILK_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
+import { UNIM_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
 
 import useBottler, { BOTTLE_TYPES } from "../src/core/hooks/useBottler";
 import { targetChain } from "../src/core/providers/Web3Provider";
@@ -19,7 +19,7 @@ const assets: any = {
 const Homepage = () => {
   const ui = useContext(UIContext);
   const bottler = useBottler({
-    MilkAddress: MILK_ADDRESS,
+    MilkAddress: UNIM_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
     targetChain: targetChain,
   });
