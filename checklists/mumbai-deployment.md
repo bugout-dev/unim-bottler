@@ -24,178 +24,40 @@ export MAX_UINT256=$(python -c "print(2**256-1)")
 
 
 ## Deployment
-
-```bash
-bottler core gogogo \
-    --sender $SENDER_KEYFILE \
-    --owner $SENDER_ADDRESS \
-    --network $POLYGON_NETWORK \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --confirmations $CONFIRMATIONS \
-    -o $OUTFILE
-
 ```
-
-`export BOTTLER_DIAMOND=<Diamond_address_of_bottler>`
-
-```bash
-bottler bottler set-up \
-    --network $POLYGON_NETWORK \
-    --address $BOTTLER_DIAMOND \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --confirmations $CONFIRMATIONS \
-    --unim-address-arg $UNIM \
-    --terminus-address-arg $TERMINUS 
-
+bottler core release-the-kraken --network polygon-test --sender $SENDER_KEYFILE  --owner $SENDER_ADDRESS --terminus $TERMINUS --unicorn-milk $UNIM --full-bottle-prices 1 4 24 --gas-price "100 gwei"
 ```
 
 
 
-
-Verify Unim address:`bottler bottler get-unim-address --network $POLYGON_NETWORK --address $BOTTLER_DIAMOND`
-
-Verify Terminus address: `bottler bottler get-terminus-address --network $POLYGON_NETWORK --address $BOTTLER_DIAMOND`
-
-export Terminus payment token `export TERMINUS_PAYMENT_TOKEN=$MNSTR_DAO`
-
-
-Approve terminus payment token :
 ```
-bottler erc20 approve \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS_PAYMENT_TOKEN \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --confirmations $CONFIRMATIONS \
-    --spender $TERMINUS \
-    --amount $MAX_UINT256
-
+{
+    "gogogo": {
+        "DiamondCutFacet": "0x7C6736683A545d5c1BC6495F3FB39A0b491d403f",
+        "Diamond": "0x5411aed2C143B3cdAD84c5BfeC908F9AF136B97D",
+        "DiamondLoupeFacet": "0xAa0e66C3C591411fD5A0f7A021ed6830f316F6d6",
+        "OwnershipFacet": "0x97b24031e0d61370Df3B9a21F1e7b4763FB6feA4",
+        "BottlerInitializer": "0x0BBB49B534fc2D89Fba17BDa6Bb32A2C0A7D2a5F",
+        "BottlerFacet": "0x46d31AFE335572BBC3EaEe084330510DCd1039d0",
+        "attached": [
+            "DiamondLoupeFacet",
+            "OwnershipFacet",
+            "BottlerFacet"
+        ]
+    },
+    "pools": {
+        "empty": [
+            69,
+            70,
+            71
+        ],
+        "full": [
+            72,
+            73,
+            74
+        ]
+    }
 ```
-
-
-Create terminus pools:
-```
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-bottler terminus create-pool-v1 \
-    --network $POLYGON_NETWORK \
-    --address $TERMINUS \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --capacity-arg $MAX_UINT256 \
-    --transferable-arg true \
-    --burnable-arg true
-
-```
-
-Attach empty bottle pool ids in bottler contract
-```
-bottler bottler set-empty-bottle-pool-ids \
-    --network $POLYGON_NETWORK \
-    --address $BOTTLER_DIAMOND \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --new-empty-bottle-pool-ids 33 34 35
-
-```
-
-Attach full bottle pool ids in bottler contract
-```
-bottler bottler set-full-bottle-pool-ids \
-    --network $POLYGON_NETWORK \
-    --address $BOTTLER_DIAMOND \
-    --sender $SENDER_KEYFILE \
-    --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-    --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-    --new-full-bottle-pool-ids 36 37 38
-
-```
-
-
-Giving pools control to Bottler contract
-```
-for i in {33..38} 
-do
-    bottler terminus set-pool-controller \
-        --network $POLYGON_NETWORK \
-        --address $TERMINUS \
-        --sender $SENDER_KEYFILE \
-        --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-        --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-        --pool-id $i --new-controller $BOTTLER_DIAMOND 
-done
-```
-
-Setting bottles capacities
-##haven't run yet:
-```
- bottler bottler set-bottle-capacities \
-        --network $POLYGON_NETWORK \
-        --address $BOTTLER_DIAMOND \
-        --sender $SENDER_KEYFILE \
-        --max-fee-per-gas "$MAX_FEE_PER_GAS" \
-        --max-priority-fee-per-gas "$MAX_PRIORITY_FEE_PER_GAS" \
-        --new-bottle-capacities 5000 2000 500
-```
-
-
-
-
-
 
 
 

@@ -295,4 +295,10 @@ contract BottlerFacet is ERC1155Holder {
             );
         }
     }
+
+    function setTerminusPoolURI(uint256 poolId, string memory uri) external {
+        LibBottler.enforceIsController();
+        TerminusFacet terminus = getTerminusContract();
+        terminus.setURI(poolId, uri);
+    }
 }
