@@ -40,12 +40,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
   }, [numberOfBottles, props.bottle, bottler.erc20Balance]);
 
   React.useEffect(() => {
-    if (bottler.approveSpendMilk.status === txStatus.ERROR) {
-      toggleModal({ type: MODAL_TYPES.OFF });
-    }
-  }, [bottler.approveSpendMilk.status, toggleModal]);
-
-  React.useEffect(() => {
     if (
       bottler.pourFullBottles.status === txStatus.ERROR ||
       bottler.pourFullBottles.status === txStatus.SUCCESS
@@ -106,8 +100,7 @@ const PourBottle = (props: { bottle: BottleType }) => {
           colorScheme="green"
           variant="solid"
           onClick={() =>
-            // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
-            bottler.pourFullBottles.send(numberOfBottles)
+            bottler.pourFullBottles.send(props.bottle.poolId, numberOfBottles, {})
           }
         >
           Submit

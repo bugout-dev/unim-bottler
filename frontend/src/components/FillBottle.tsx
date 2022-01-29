@@ -12,13 +12,13 @@ import {
   NumberDecrementStepper,
 } from "@chakra-ui/react";
 import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
-import Web3Context, { txStatus } from "../core/providers/Web3Provider/context";
+import Web3Context, { txStatus, web3MethodCall } from "../core/providers/Web3Provider/context";
 import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
 import overlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
-const FillBottle = (props: { bottle: BottleType }) => {
+const FillBottle = (props: { bottle: BottleType, refill: boolean }) => {
   const { toggleModal } = useContext(overlayContext);
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
@@ -34,6 +34,8 @@ const FillBottle = (props: { bottle: BottleType }) => {
         : chains.matic,
   });
   const [valueToApprove, setValueToApprove] = React.useState<number>(0);
+
+  let fillMethod: web3MethodCall = props.refill ? bottler.fillEmptyBottles : bottler.fillBottles;
 
   React.useEffect(() => {
     const erc20Balance = Number(bottler.erc20Balance);
@@ -58,12 +60,12 @@ const FillBottle = (props: { bottle: BottleType }) => {
 
   React.useEffect(() => {
     if (
-      bottler.fillBottles.status === txStatus.ERROR ||
-      bottler.fillBottles.status === txStatus.SUCCESS
+      fillMethod.status === txStatus.ERROR ||
+      fillMethod.status === txStatus.SUCCESS
     ) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.fillBottles.status, toggleModal]);
+  }, [fillMethod.status, toggleModal]);
 
   return (
     <Center>
@@ -121,7 +123,8 @@ const FillBottle = (props: { bottle: BottleType }) => {
                 BOTTLER_ADDRESS,
                 web3Provider.web3.utils.toWei(
                   web3Provider.web3.utils.toBN(requiredMilk)
-                )
+                ),
+                {}
               )
             }
           >
@@ -131,16 +134,16 @@ const FillBottle = (props: { bottle: BottleType }) => {
         )}
         {valueToApprove === 0 && (
           <Button
-            isLoading={bottler.fillBottles.status === txStatus.LOADING}
+            isLoading={fillMethod.status === txStatus.LOADING}
             isDisabled={!canAfford}
             placeSelf={"center"}
             colorScheme="green"
             variant="solid"
             onClick={() =>
-              bottler.fillBottles.send(
+              fillMethod.send(
                 props.bottle.poolId,
                 web3Provider.web3.utils.toBN(numberOfBottles),
-                {value: props.bottle.weiPrice}
+                {value: props.refill ? 0 : props.bottle.weiPrice}
               )
             }
           >

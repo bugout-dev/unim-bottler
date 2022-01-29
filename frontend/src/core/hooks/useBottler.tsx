@@ -51,6 +51,7 @@ export interface useBottlerReturns {
   erc20Balance: string;
   allowance: string;
   fillBottles: web3MethodCall;
+  fillEmptyBottles: web3MethodCall;
   approveSpendMilk: web3MethodCall;
   emptyBottles: Array<number>;
   fullBottles: Array<number>;
@@ -154,6 +155,21 @@ const useBottler = ({
     },
   });
 
+  const fillEmptyBottles = useWeb3MethodCall({
+    name: "fillEmptyBottles",
+    contract: bottlerContract,
+    targetChain: targetChain,
+    onSuccess: () => {
+      toast("Successfully bottled milk!", "success", "Success!!111one");
+      syncAccountState();
+    },
+    onError: (error) => {
+      toast(">.< Bottling failed", "error", "FAIL!");
+      console.error(error);
+    },
+  });
+
+
   const approveSpendMilk = useWeb3MethodCall({
     name: "approve",
     contract: contract,
@@ -169,7 +185,7 @@ const useBottler = ({
   });
 
   const pourFullBottles = useWeb3MethodCall({
-    name: "emptySmallBottles",
+    name: "emptyBottles",
     contract: bottlerContract,
     targetChain: targetChain,
     onSuccess: () => {
@@ -194,6 +210,7 @@ const useBottler = ({
     emptyBottles,
     fullBottles,
     fillBottles,
+    fillEmptyBottles,
     approveSpendMilk,
     pourFullBottles,
   };
