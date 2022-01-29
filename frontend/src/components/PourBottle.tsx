@@ -100,7 +100,11 @@ const PourBottle = (props: { bottle: BottleType }) => {
           colorScheme="green"
           variant="solid"
           onClick={() =>
-            bottler.pourFullBottles.send(props.bottle.poolId, numberOfBottles, {})
+            bottler.pourFullBottles.send(
+              props.bottle.poolId,
+              numberOfBottles,
+              {}
+            )
           }
         >
           Submit

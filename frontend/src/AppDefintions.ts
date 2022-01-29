@@ -1,2 +1,6 @@
-export const MILK_ADDRESS = process.env.NEXT_PUBLIC_UNIMLK_ADDRESS;
-export const BOTTLER_ADDRESS = process.env.NEXT_PUBLIC_BOTTLER_ADDRESS;
+export const MILK_ADDRESS =
+  process.env.NEXT_PUBLIC_UNIMLK_ADDRESS ??
+  "not defined NEXT_PUBLIC_UNIMLK_ADDRESS";
+export const BOTTLER_ADDRESS =
+  process.env.NEXT_PUBLIC_BOTTLER_ADDRESS ??
+  "Not defined NEXT_PUBLIC_BOTTLER_ADDRESS";

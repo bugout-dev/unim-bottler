@@ -38,9 +38,9 @@ const useWeb3Method = ({
         throw new Error("Error: Transaction submitted incorrectly");
       }
       let methodArgs = args.slice(0, args.length - 1);
-      let transactionConfig = args[args.length-1];
+      let transactionConfig = args[args.length - 1];
       if (!transactionConfig.from) {
-        transactionConfig.from = web3Provider.account
+        transactionConfig.from = web3Provider.account;
       }
       setStatus(txStatus.LOADING);
       console.log("args:", args, name);

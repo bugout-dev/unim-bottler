@@ -12,13 +12,16 @@ import {
   NumberDecrementStepper,
 } from "@chakra-ui/react";
 import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
-import Web3Context, { txStatus, web3MethodCall } from "../core/providers/Web3Provider/context";
+import Web3Context, {
+  txStatus,
+  web3MethodCall,
+} from "../core/providers/Web3Provider/context";
 import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
 import overlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
-const FillBottle = (props: { bottle: BottleType, refill: boolean }) => {
+const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
   const { toggleModal } = useContext(overlayContext);
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
@@ -35,7 +38,9 @@ const FillBottle = (props: { bottle: BottleType, refill: boolean }) => {
   });
   const [valueToApprove, setValueToApprove] = React.useState<number>(0);
 
-  let fillMethod: web3MethodCall = props.refill ? bottler.fillEmptyBottles : bottler.fillBottles;
+  let fillMethod: web3MethodCall = props.refill
+    ? bottler.fillEmptyBottles
+    : bottler.fillBottles;
 
   React.useEffect(() => {
     const erc20Balance = Number(bottler.erc20Balance);
@@ -143,7 +148,7 @@ const FillBottle = (props: { bottle: BottleType, refill: boolean }) => {
               fillMethod.send(
                 props.bottle.poolId,
                 web3Provider.web3.utils.toBN(numberOfBottles),
-                {value: props.refill ? 0 : props.bottle.weiPrice}
+                { value: props.refill ? 0 : props.bottle.weiPrice }
               )
             }
           >
