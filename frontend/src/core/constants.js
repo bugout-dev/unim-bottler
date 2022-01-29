@@ -10,11 +10,12 @@ export const APP_API_URL = process.env.NEXT_PUBLIC_APP_API_URL;
   image: URL of image to display on page preview in search engines and link shares
 */
 export const DEFAULT_METATAGS = {
-  title: "Terminus web app",
-  description: "Whitelists on steroid for your smart contrac business",
-  keywords: "web3, smart contracts, whitelist",
+  title: "Unicorn milk bottler shop",
+  description: "Wrap your UNIMLK erc20 in to NFTs!",
+  keywords: "web3, smart contracts, unimlk, nfts",
+  //TODO(@Peersky): setup correct url here
   url: "https://www.changeme.at.constants.js",
-  image: `https://www.changeme.at.constants.js`,
+  image: `https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png`,
 };
 
 /*
