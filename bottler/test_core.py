@@ -66,7 +66,9 @@ class BottlerTestCase(BottlerDeploymentTestCase):
 
         bottler = BottlerFacet(cls.contracts["Diamond"])
         bottler.set_up(cls.unim.address, cls.terminus.address, {"from": accounts[0]})
-        bottler.set_bottle_capacities([5000, 1000, 500], {"from": accounts[0]})
+
+        cls.bottle_capacities = [5000, 1000, 500]
+        bottler.set_bottle_capacities(cls.bottle_capacities, {"from": accounts[0]})
 
         cls.bottler = bottler
 
@@ -88,6 +90,21 @@ class BottlerTestCase(BottlerDeploymentTestCase):
     def test_contract_setup(self):
         prices = self.bottler.get_full_bottle_prices()
         self.assertListEqual(list(prices), self.full_bottle_prices)
+
+        full_bottle_pool_ids = list(self.bottler.get_full_bottle_pool_ids())
+        self.assertCountEqual(full_bottle_pool_ids, self.pool_ids["full"])
+
+        empty_bottle_pool_ids = list(self.bottler.get_empty_bottle_pool_ids())
+        self.assertCountEqual(empty_bottle_pool_ids, self.pool_ids["empty"])
+
+        capacities = self.bottler.get_bottle_capacities()
+        self.assertCountEqual(capacities, self.bottle_capacities)
+
+        unim_address = self.bottler.get_unim_address()
+        self.assertEqual(unim_address, self.unim.address)
+
+        terminus_address = self.bottler.get_terminus_address()
+        self.assertEqual(terminus_address, self.terminus.address)
 
 
 if __name__ == "__main__":
