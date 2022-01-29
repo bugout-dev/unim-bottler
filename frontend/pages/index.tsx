@@ -2,13 +2,19 @@ import React, { useContext } from "react";
 import { Stack, Heading, Center, Flex } from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
 import { MILK_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
-const assets = undefined;
+
 import useBottler, { BOTTLE_TYPES } from "../src/core/hooks/useBottler";
 import { targetChain } from "../src/core/providers/Web3Provider";
 
 import UIContext from "../src/core/providers/UIProvider/context";
 import BottleCard from "../src/components/BottleCard";
 import InventoryItem from "../src/components/InventoryItem";
+
+const assets: any = {
+  smallBottleImage: BOTTLE_TYPES.small.imageUrl,
+  mediumBottleImage: BOTTLE_TYPES.medium.imageUrl,
+  largeBottleImage: BOTTLE_TYPES.large.imageUrl,
+};
 
 const Homepage = () => {
   const ui = useContext(UIContext);
