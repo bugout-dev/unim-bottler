@@ -1,7 +1,6 @@
 import React, { createContext } from "react";
 import { Contract } from "web3-eth-contract";
 const erc20abi = require("../../../../abi/erc20.json");
-// const bottlerAbi = require("../../../../abi/BottlerFacetABI.json");
 const bottlerAbi = require("../../../../abi/bottlerAbi.json");
 import Web3 from "web3";
 

@@ -80,7 +80,7 @@ const Footer = () => (
         <Stack spacing={6}>
           <Stack direction={"row"}>
             <Box>
-              <Link href="/" alignSelf="center">
+              <Link href="https://discord.gg/K56VNUQGvA" alignSelf="center">
                 <ChakraImage
                   alignSelf="center"
                   // as={Link}

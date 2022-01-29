@@ -1,23 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "uint256[3]",
-        "name": "fullBottlePoolIds",
-        "type": "uint256[3]"
-      },
-      {
-        "internalType": "uint256[3]",
-        "name": "emptyBottlePoolIds",
-        "type": "uint256[3]"
-      }
-    ],
-    "name": "addTerminusPools",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "bottlerController",
     "outputs": [
@@ -47,11 +29,16 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "bottlesCount",
         "type": "uint256"
       }
     ],
-    "name": "emptyLargeBottles",
+    "name": "emptyBottles",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -60,63 +47,34 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "bottlesCount",
+        "name": "poolIndex",
         "type": "uint256"
-      }
-    ],
-    "name": "emptyMediumBottles",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
         "internalType": "uint256",
         "name": "bottlesCount",
         "type": "uint256"
       }
     ],
-    "name": "emptySmallBottles",
+    "name": "fillBottles",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "bottlesCount",
+        "name": "poolIndex",
         "type": "uint256"
-      }
-    ],
-    "name": "fillLargeBottles",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
         "internalType": "uint256",
         "name": "bottlesCount",
         "type": "uint256"
       }
     ],
-    "name": "fillMediumBottles",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "bottlesCount",
-        "type": "uint256"
-      }
-    ],
-    "name": "fillSmallBottles",
+    "name": "fillEmptyBottles",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -201,6 +159,19 @@
   {
     "inputs": [],
     "name": "getFullBottlePoolIds",
+    "outputs": [
+      {
+        "internalType": "uint256[3]",
+        "name": "",
+        "type": "uint256[3]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getFullBottlePrices",
     "outputs": [
       {
         "internalType": "uint256[3]",
@@ -382,6 +353,37 @@
       }
     ],
     "name": "setFullBottlePoolIds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[3]",
+        "name": "prices",
+        "type": "uint256[3]"
+      }
+    ],
+    "name": "setFullBottlePrices",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "poolId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
+      }
+    ],
+    "name": "setTerminusPoolURI",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

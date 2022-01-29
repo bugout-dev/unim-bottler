@@ -53,13 +53,13 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
         wasSetupSuccess = true;
       });
 
-    if (wasSetupSuccess) {
-      console.log("testing if web3 is using provider without errors");
-      await web3.eth.net.isListening().then(
-        (isListening) => (wasSetupSuccess = isListening),
-        () => (wasSetupSuccess = false)
-      );
-    }
+    // if (wasSetupSuccess) {
+    //   console.log("testing if web3 is using provider without errors");
+    //   await web3.eth.net.isListening().then(
+    //     (isListening) => (wasSetupSuccess = isListening),
+    //     () => (wasSetupSuccess = false)
+    //   );
+    // }
     return wasSetupSuccess;
   };
 

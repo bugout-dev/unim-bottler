@@ -16,7 +16,7 @@ const BottleCard = ({
     console.log(bottle.name);
     overlay.toggleModal({
       type: MODAL_TYPES.FILL_BOTTLE,
-      props: { bottle: bottle },
+      props: { bottle: bottle, refill: false },
     });
   };
 

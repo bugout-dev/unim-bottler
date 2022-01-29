@@ -10,7 +10,7 @@ export interface UseWeb3MethodReturns {
   call: (...args: any[]) => any;
 }
 
-export interface UseWeb3MEthod {
+export interface UseWeb3Method {
   name: string;
   contract: Contract;
   targetChain: any;
@@ -18,13 +18,13 @@ export interface UseWeb3MEthod {
   onError?: (error?: any) => void;
 }
 
-const useWeb3MEthod = ({
+const useWeb3Method = ({
   name,
   contract,
   targetChain,
   onSuccess,
   onError,
-}: UseWeb3MEthod): UseWeb3MethodReturns => {
+}: UseWeb3Method): UseWeb3MethodReturns => {
   const [status, setStatus] = React.useState<txStatus>(txStatus.READY);
   const [data, setData] = React.useState<any>(undefined);
   const web3Provider = useContext(Web3Context);
@@ -34,10 +34,18 @@ const useWeb3MEthod = ({
       web3Provider.web3?.utils.isAddress(web3Provider.account) &&
       web3Provider.chainId === targetChain.chainId
     ) {
+      if (args.length === 0) {
+        throw new Error("Error: Transaction submitted incorrectly");
+      }
+      let methodArgs = args.slice(0, args.length - 1);
+      let transactionConfig = args[args.length - 1];
+      if (!transactionConfig.from) {
+        transactionConfig.from = web3Provider.account;
+      }
       setStatus(txStatus.LOADING);
       console.log("args:", args, name);
-      contract.methods[`${name}`](...args)
-        .send({ from: web3Provider.account })
+      contract.methods[`${name}`](...methodArgs)
+        .send(transactionConfig)
         .once("receipt", (receipt: any) => {
           console.log("receipt is:", receipt);
           if (receipt.status) {
@@ -81,4 +89,4 @@ const useWeb3MEthod = ({
   return { data, status, send, call };
 };
 
-export default useWeb3MEthod;
+export default useWeb3Method;

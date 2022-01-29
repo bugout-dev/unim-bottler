@@ -11,7 +11,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { BOTTLER_ADDRESS, MILK_ADDRESS } from "../AppDefintions";
+import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
 import { txStatus } from "../core/providers/Web3Provider/context";
 import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
@@ -24,7 +24,7 @@ const PourBottle = (props: { bottle: BottleType }) => {
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
   const bottler = useBottler({
-    MilkAddress: MILK_ADDRESS,
+    MilkAddress: UNIM_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
     targetChain:
       process.env.NODE_ENV === "development"
@@ -38,12 +38,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
       numberOfBottles * props.bottle.volume <= erc20Balance ? true : false
     );
   }, [numberOfBottles, props.bottle, bottler.erc20Balance]);
-
-  React.useEffect(() => {
-    if (bottler.approveSpendMilk.status === txStatus.ERROR) {
-      toggleModal({ type: MODAL_TYPES.OFF });
-    }
-  }, [bottler.approveSpendMilk.status, toggleModal]);
 
   React.useEffect(() => {
     if (
@@ -106,8 +100,11 @@ const PourBottle = (props: { bottle: BottleType }) => {
           colorScheme="green"
           variant="solid"
           onClick={() =>
-            // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
-            bottler.pourFullBottles.send(numberOfBottles)
+            bottler.pourFullBottles.send(
+              props.bottle.poolId,
+              numberOfBottles,
+              {}
+            )
           }
         >
           Submit

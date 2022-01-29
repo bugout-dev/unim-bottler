@@ -3,7 +3,6 @@ import DataContext from "./context";
 import { Contract } from "web3-eth-contract";
 import Web3Context from "../Web3Provider/context";
 const erc20abi = require("../../../../abi/erc20.json");
-// const bottlerAbi = require("../../../../abi/BottlerFacetABI.json");
 const bottlerAbi = require("../../../../abi/bottlerAbi.json");
 
 const DataProvider = ({ children }: { children: JSX.Element }) => {

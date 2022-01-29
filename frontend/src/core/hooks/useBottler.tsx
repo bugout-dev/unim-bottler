@@ -2,14 +2,17 @@ import React, { useContext } from "react";
 import Web3Context from "../providers/Web3Provider/context";
 import { useToast } from "./";
 import { web3MethodCall } from "../providers/Web3Provider/context";
-import useWeb3MEthodCall from "./useWeb3MethodCall";
+import useWeb3MethodCall from "./useWeb3MethodCall";
 import DataContext from "../providers/DataProvider/context";
 
 export interface BottleType {
   volume: number;
   name: string;
   imageUrl: string;
+  // TODO(zomglings): Rename to poolIndex. It is too easy to confuse poolId as referring to the Terminus
+  // pool ID.
   poolId: number;
+  weiPrice: string;
 }
 export interface BottleTypes {
   small: BottleType;
@@ -24,6 +27,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png",
     poolId: 0,
+    weiPrice: "100000000000000000",
   },
   medium: {
     volume: process.env.NODE_ENV !== "development" ? 2500 : 5000,
@@ -31,6 +35,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/medium_um.png",
     poolId: 1,
+    weiPrice: "400000000000000000",
   },
   large: {
     volume: process.env.NODE_ENV !== "development" ? 50000 : 50000,
@@ -38,6 +43,7 @@ export const BOTTLE_TYPES: BottleTypes = {
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/large_um.png",
     poolId: 2,
+    weiPrice: "2400000000000000000",
   },
 };
 
@@ -45,6 +51,7 @@ export interface useBottlerReturns {
   erc20Balance: string;
   allowance: string;
   fillBottles: web3MethodCall;
+  fillEmptyBottles: web3MethodCall;
   approveSpendMilk: web3MethodCall;
   emptyBottles: Array<number>;
   fullBottles: Array<number>;
@@ -134,8 +141,8 @@ const useBottler = ({
     web3Provider.web3.utils,
     web3Provider.chainId,
   ]);
-  const fillBottles = useWeb3MEthodCall({
-    name: "fillSmallBottles",
+  const fillBottles = useWeb3MethodCall({
+    name: "fillBottles",
     contract: bottlerContract,
     targetChain: targetChain,
     onSuccess: () => {
@@ -148,7 +155,21 @@ const useBottler = ({
     },
   });
 
-  const approveSpendMilk = useWeb3MEthodCall({
+  const fillEmptyBottles = useWeb3MethodCall({
+    name: "fillEmptyBottles",
+    contract: bottlerContract,
+    targetChain: targetChain,
+    onSuccess: () => {
+      toast("Successfully bottled milk!", "success", "Success!!111one");
+      syncAccountState();
+    },
+    onError: (error) => {
+      toast(">.< Bottling failed", "error", "FAIL!");
+      console.error(error);
+    },
+  });
+
+  const approveSpendMilk = useWeb3MethodCall({
     name: "approve",
     contract: contract,
     targetChain: targetChain,
@@ -162,8 +183,8 @@ const useBottler = ({
     },
   });
 
-  const pourFullBottles = useWeb3MEthodCall({
-    name: "emptySmallBottles",
+  const pourFullBottles = useWeb3MethodCall({
+    name: "emptyBottles",
     contract: bottlerContract,
     targetChain: targetChain,
     onSuccess: () => {
@@ -188,6 +209,7 @@ const useBottler = ({
     emptyBottles,
     fullBottles,
     fillBottles,
+    fillEmptyBottles,
     approveSpendMilk,
     pourFullBottles,
   };

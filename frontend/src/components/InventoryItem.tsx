@@ -32,7 +32,7 @@ const InventoryItem = ({
   const handleRefillClick = ({ item }: { item: BottleType }) => {
     overlay.toggleModal({
       type: MODAL_TYPES.FILL_BOTTLE,
-      props: { bottle: item },
+      props: { bottle: item, refill: true },
     });
   };
 
