@@ -142,7 +142,7 @@ contract BottlerFacet is ERC1155Holder {
 
         require(
             unim.balanceOf(address(this)) >= amount,
-            "BottlerFacet:emptyBottles - Cotract ran out of UNIM, it cannot happen"
+            "BottlerFacet:emptyBottles - Contract ran out of UNIM, it cannot happen"
         );
 
         uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
