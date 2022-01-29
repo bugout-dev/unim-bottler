@@ -16,6 +16,9 @@ class TestBottlerContract(BottlerTestCase):
         filler_account = accounts[1]
         unim_value = self.bottler.get_volume_by_index(pool_number)
 
+        with self.assertRaises(VirtualMachineError):
+            self.bottler.get_volume_by_index(10)
+
         self.unim.mint(filler_account.address, unim_value, {"from": accounts[0]})
         self.unim.approve(
             self.bottler.address,
@@ -66,6 +69,26 @@ class TestBottlerContract(BottlerTestCase):
             self.bottler.get_full_bottle_inventory(filler_account.address)
         )
 
+        with self.assertRaises(VirtualMachineError):
+            # BottlerFacet:getVolumeByIndex - index out of bounds
+            self.bottler.fill_bottles(
+                10,
+                4,
+                {
+                    "from": filler_account,
+                    "value": 4 * self.full_bottle_prices[pool_number],
+                },
+            )
+        with self.assertRaises(VirtualMachineError):
+            # BottlerFacet:fillBottles - Not enough value sent in transaction
+            self.bottler.fill_bottles(
+                pool_number,
+                5,
+                {
+                    "from": filler_account,
+                    "value": 4 * self.full_bottle_prices[pool_number],
+                },
+            )
         self.bottler.fill_bottles(
             pool_number,
             4,
@@ -74,6 +97,16 @@ class TestBottlerContract(BottlerTestCase):
                 "value": 4 * self.full_bottle_prices[pool_number],
             },
         )
+        with self.assertRaises(VirtualMachineError):
+            # ERC20: transfer amount exceeds balance
+            self.bottler.fill_bottles(
+                pool_number,
+                1,
+                {
+                    "from": filler_account,
+                    "value": 1 * self.full_bottle_prices[pool_number],
+                },
+            )
 
         filler_balance_1 = filler_account.balance()
         controller_balance_1 = accounts[0].balance()
@@ -187,6 +220,17 @@ class TestBottlerContract(BottlerTestCase):
 
         # Empty bottles
         self.bottler.empty_bottles(pool_number, 2, {"from": filler_account})
+
+        with self.assertRaises(VirtualMachineError):
+            # ERC1155WithTerminusStorage: burn amount exceeds balance
+            self.bottler.empty_bottles(
+                pool_number - 1,
+                1,
+                {"from": filler_account},
+            )
+        with self.assertRaises(VirtualMachineError):
+            # BottlerFacet:emptyBottles - Contract ran out of UNIM, it cannot happen
+            self.bottler.empty_bottles(pool_number, 2, {"from": filler_account})
 
         filler_balance_2 = filler_account.balance()
         controller_balance_2 = accounts[0].balance()
@@ -340,6 +384,13 @@ class TestBottlerContract(BottlerTestCase):
         )
 
         # Fill empty bottles back
+        with self.assertRaises(VirtualMachineError):
+            # BottlerFacet:getVolumeByIndex - index out of bounds
+            self.bottler.fill_empty_bottles(10, 1, {"from": filler_account})
+        with self.assertRaises(VirtualMachineError):
+            # BottlerFacet:fillEmptyBottles - Sender does not have enough empty bottles
+            self.bottler.fill_empty_bottles(pool_number, 10, {"from": filler_account})
+
         self.bottler.fill_empty_bottles(pool_number, 1, {"from": filler_account})
 
         filler_balance_3 = filler_account.balance()
