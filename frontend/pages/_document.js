@@ -34,10 +34,15 @@ export default class MyDocument extends Document {
           <link
             rel="preload"
             as="style"
-            href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;500;600;700;800;900&display=swap"
           />
           <link
-            href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&display=swap"
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;500;600;700;800;900&display=swap"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;500;600;700;800;900&display=swap"
             rel="stylesheet"
           />
           <link rel="preconnect" href="https://s3.amazonaws.com" />

@@ -58,9 +58,9 @@ const theme = extendTheme({
   },
 
   fonts: {
-    heading: '"Work Sans", sans-serif',
-    body: '"Work Sans", sans-serif',
-    mono: '"Work Sans", monospace',
+    heading: '"Comic Neue", sans-serif',
+    body: '"Comic Neue", sans-serif',
+    mono: '"Comic Neue", monospace',
   },
   fontSizes: {
     xs: "0.625rem", //10px
