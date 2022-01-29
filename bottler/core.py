@@ -9,6 +9,9 @@ import sys
 from typing import Any, Dict, List, Optional, Set
 
 from brownie import network
+from bottler.MockErc20 import MockErc20
+
+from bottler.MockTerminus import MockTerminus
 
 from . import (
     abi,
@@ -227,6 +230,77 @@ def gogogo(owner_address: str, transaction_config: Dict[str, Any]) -> Dict[str, 
     return result
 
 
+def release_the_kraken(
+    owner_address: str,
+    terminus_address: str,
+    unicorn_milk_address: str,
+    raw_full_bottle_prices: List[int],
+    transaction_config: Dict[str, Any],
+) -> Dict[str, Any]:
+
+    result: Dict[str, Any] = {}
+    terminus = MockTerminus(terminus_address)
+    terminus_payment_token_address = terminus.payment_token()
+    terminus_payment_token = MockErc20(terminus_payment_token_address)
+
+    print("Checking if you have enough terminus payment tokens")
+    balance = terminus_payment_token.balance_of(owner_address)
+    print("Your terminus payment token balance is:", balance)
+    if balance < terminus.pool_base_price() * 6:
+        raise Exception("You don't have enough tokens to pay for the pools")
+
+    print("Running gogogo")
+    gogogo_result = gogogo(owner_address, transaction_config)
+    if "error" in gogogo_result:
+        print(gogogo_result)
+        print("Do you want to continue anyway? (y/n)")
+        if input() != "y":
+            raise Exception(gogogo_result["error"])
+
+    result["gogogo"] = gogogo_result
+    bottler = BottlerFacet.BottlerFacet(result["gogogo"]["Diamond"])
+
+    print("Creating terminus pools:")
+    current_id = terminus.total_pools() + 1
+
+    print("Approving the payment token for terminus")
+    terminus_payment_token.approve(terminus.address, 2 ** 256 - 1, transaction_config)
+
+    print("Creating pools:")
+    for i in range(1, 7):
+        terminus.create_pool_v1(2 ** 256 - 1, True, True, transaction_config)
+
+    result["pools"] = {
+        "empty": [current_id, current_id + 1, current_id + 2],
+        "full": [current_id + 3, current_id + 4, current_id + 5],
+    }
+
+    print("Transferring pools control to the bottler contract")
+    for pool_id in result["pools"]["empty"]:
+        terminus.set_pool_controller(
+            pool_id,
+            bottler.address,
+            transaction_config,
+        )
+
+    for pool_id in result["pools"]["full"]:
+        terminus.set_pool_controller(
+            pool_id,
+            bottler.address,
+            transaction_config,
+        )
+
+    bottler.set_up(unicorn_milk_address, terminus_address, transaction_config)
+    bottler.set_bottle_capacities([5000, 1000, 500], transaction_config)
+
+    bottler.set_empty_bottle_pool_ids(result["pools"]["empty"], transaction_config)
+    bottler.set_full_bottle_pool_ids(result["pools"]["full"], transaction_config)
+
+    full_bottle_prices = raw_full_bottle_prices
+    bottler.set_full_bottle_prices(full_bottle_prices, transaction_config)
+    return result
+
+
 def handle_facet_cut(args: argparse.Namespace) -> None:
     network.connect(args.network)
     diamond_address = args.address
@@ -251,6 +325,25 @@ def handle_gogogo(args: argparse.Namespace) -> None:
     owner_address = args.owner
     transaction_config = Diamond.get_transaction_config(args)
     result = gogogo(owner_address, transaction_config)
+    if args.outfile is not None:
+        with args.outfile:
+            json.dump(result, args.outfile)
+    json.dump(result, sys.stdout, indent=4)
+
+
+def handle_release_the_kraken(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    owner_address = args.owner
+
+    transaction_config = Diamond.get_transaction_config(args)
+    result = release_the_kraken(
+        owner_address,
+        args.terminus,
+        args.unicorn_milk,
+        args.full_bottle_prices,
+        transaction_config,
+    )
+
     if args.outfile is not None:
         with args.outfile:
             json.dump(result, args.outfile)
@@ -330,6 +423,38 @@ def generate_cli() -> argparse.ArgumentParser:
 
     OwnershipFacet_parser = OwnershipFacet.generate_cli()
     subcommands.add_parser("ownership", parents=[OwnershipFacet_parser], add_help=False)
+
+    release_the_kraken_parser = subcommands.add_parser("release-the-kraken")
+    Diamond.add_default_arguments(release_the_kraken_parser, transact=True)
+    release_the_kraken_parser.add_argument(
+        "--owner", required=True, help="Address of owner of diamond proxy"
+    )
+    release_the_kraken_parser.add_argument(
+        "-o",
+        "--outfile",
+        type=argparse.FileType("w"),
+        default=None,
+        help="(Optional) file to write deployed addresses to",
+    )
+    release_the_kraken_parser.add_argument(
+        "--terminus",
+        required=True,
+        help="Address of terminus contract",
+    )
+    release_the_kraken_parser.add_argument(
+        "--unicorn-milk",
+        required=True,
+        help="Address of unicorn milk contract",
+    )
+    release_the_kraken_parser.add_argument(
+        "--full-bottle-prices",
+        nargs="+",
+        type=int,
+        required=True,
+        help="Full bottle prices",
+    )
+
+    release_the_kraken_parser.set_defaults(func=handle_release_the_kraken)
 
     return parser
 
