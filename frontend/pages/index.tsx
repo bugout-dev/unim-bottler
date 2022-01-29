@@ -57,7 +57,7 @@ const Homepage = () => {
               alignItems={"baseline"}
             >
               <BottleCard
-                bottle={BOTTLE_TYPES.medium}
+                bottle={BOTTLE_TYPES.small}
                 isDisabled={
                   Number(bottler.erc20Balance) < BOTTLE_TYPES.small.volume
                 }

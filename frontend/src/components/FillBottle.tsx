@@ -137,9 +137,10 @@ const FillBottle = (props: { bottle: BottleType }) => {
             colorScheme="green"
             variant="solid"
             onClick={() =>
-              // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
               bottler.fillBottles.send(
-                web3Provider.web3.utils.toBN(numberOfBottles)
+                props.bottle.poolId,
+                web3Provider.web3.utils.toBN(numberOfBottles),
+                {value: props.bottle.weiPrice}
               )
             }
           >
