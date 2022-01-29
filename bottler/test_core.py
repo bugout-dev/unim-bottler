@@ -12,6 +12,7 @@ from . import MockTerminus, MockErc20
 
 DECIMALS = 10 ** 18
 
+
 class BottlerDeploymentTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -65,7 +66,9 @@ class BottlerTestCase(BottlerDeploymentTestCase):
 
         bottler = BottlerFacet(cls.contracts["Diamond"])
         bottler.set_up(cls.unim.address, cls.terminus.address, {"from": accounts[0]})
-        bottler.set_bottle_capacities([5000, 1000, 500], {"from": accounts[0]})
+
+        cls.bottle_capacities = [5000, 1000, 500]
+        bottler.set_bottle_capacities(cls.bottle_capacities, {"from": accounts[0]})
 
         cls.bottler = bottler
 
@@ -81,23 +84,27 @@ class BottlerTestCase(BottlerDeploymentTestCase):
         }
         bottler.set_empty_bottle_pool_ids(cls.pool_ids["empty"], {"from": accounts[0]})
         bottler.set_full_bottle_pool_ids(cls.pool_ids["full"], {"from": accounts[0]})
-        cls.full_bottle_prices = [1*DECIMALS, 4*DECIMALS, 24*DECIMALS]
+        cls.full_bottle_prices = [1 * DECIMALS, 4 * DECIMALS, 24 * DECIMALS]
         bottler.set_full_bottle_prices(cls.full_bottle_prices, {"from": accounts[0]})
-
-        # Set variables for tests
-        cls.small_bottle_count = 4
-        cls.medium_bottle_count = 4
-        cls.medium_bottle_count_empty = 2
-        cls.large_bottle_count = 4
-        cls.large_bottle_count_empty = 2
-
-        cls.small_bottle_unim_volume = cls.bottler.get_volume_by_index(0)
-        cls.medium_bottle_unim_volume = cls.bottler.get_volume_by_index(1)
-        cls.large_bottle_unim_volume = cls.bottler.get_volume_by_index(2)
 
     def test_contract_setup(self):
         prices = self.bottler.get_full_bottle_prices()
         self.assertListEqual(list(prices), self.full_bottle_prices)
+
+        full_bottle_pool_ids = list(self.bottler.get_full_bottle_pool_ids())
+        self.assertCountEqual(full_bottle_pool_ids, self.pool_ids["full"])
+
+        empty_bottle_pool_ids = list(self.bottler.get_empty_bottle_pool_ids())
+        self.assertCountEqual(empty_bottle_pool_ids, self.pool_ids["empty"])
+
+        capacities = self.bottler.get_bottle_capacities()
+        self.assertCountEqual(capacities, self.bottle_capacities)
+
+        unim_address = self.bottler.get_unim_address()
+        self.assertEqual(unim_address, self.unim.address)
+
+        terminus_address = self.bottler.get_terminus_address()
+        self.assertEqual(terminus_address, self.terminus.address)
 
 
 if __name__ == "__main__":

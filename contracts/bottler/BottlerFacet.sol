@@ -35,16 +35,6 @@ contract BottlerFacet is ERC1155Holder {
         return LibBottler.bottlerStorage().emptyBottlePoolIds;
     }
 
-    function addTerminusPools(
-        uint256[3] memory fullBottlePoolIds,
-        uint256[3] memory emptyBottlePoolIds
-    ) public {
-        LibBottler.enforceIsController();
-        LibBottler.BottlerStorage storage bs = LibBottler.bottlerStorage();
-        bs.fullBottlePoolIds = fullBottlePoolIds;
-        bs.emptyBottlePoolIds = emptyBottlePoolIds;
-    }
-
     function getFullBottlePrices() external view returns (uint256[3] memory) {
         return LibBottler.bottlerStorage().fullBottlePrices;
     }
@@ -152,7 +142,7 @@ contract BottlerFacet is ERC1155Holder {
 
         require(
             unim.balanceOf(address(this)) >= amount,
-            "Cotract ran out of UNIM, it cannot happen"
+            "BottlerFacet:emptyBottles - Contract ran out of UNIM, it cannot happen"
         );
 
         uint256 fullBottlePoolId = bs.fullBottlePoolIds[poolIndex];
@@ -294,5 +284,11 @@ contract BottlerFacet is ERC1155Holder {
                 _owner
             );
         }
+    }
+
+    function setTerminusPoolURI(uint256 poolId, string memory uri) external {
+        LibBottler.enforceIsController();
+        TerminusFacet terminus = getTerminusContract();
+        terminus.setURI(poolId, uri);
     }
 }
