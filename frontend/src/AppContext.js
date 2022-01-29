@@ -21,10 +21,10 @@ const AppContext = (props) => {
       );
   }, []);
   return (
-    <Web3Provider>
-      <UserProvider>
-        <StripeProvider>
-          <ChakraProvider theme={theme}>
+    <UserProvider>
+      <StripeProvider>
+        <ChakraProvider theme={theme}>
+          <Web3Provider>
             <DataProvider>
               <UIProvider>
                 <OverlayProvider>
@@ -32,10 +32,10 @@ const AppContext = (props) => {
                 </OverlayProvider>
               </UIProvider>
             </DataProvider>
-          </ChakraProvider>
-        </StripeProvider>
-      </UserProvider>
-    </Web3Provider>
+          </Web3Provider>
+        </ChakraProvider>
+      </StripeProvider>
+    </UserProvider>
   );
 };
 

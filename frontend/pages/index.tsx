@@ -9,12 +9,13 @@ import {
   chakra,
   Text,
   Spacer,
+  Flex,
 } from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
 import Web3 from "web3";
 import { provider } from "web3-core";
 import Web3Context from "../src/core/providers/Web3Provider/context";
-import { BOTTLE_TYPES, BottleTypes, BottleType } from "../src/AppDefintions";
+import { MILK_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
 const ONBOARD_TEXT = "Click here to install MetaMask!";
 const CONNECT_TEXT = "Connect";
 const CONNECTED_TEXT = "Connected";
@@ -22,10 +23,20 @@ const assets = undefined;
 import { MODAL_TYPES } from "../src/core/providers/OverlayProvider/constants";
 import overlayContext from "../src/core/providers/OverlayProvider/context";
 import ProductSimple from "../src/components/BottleCard";
+import useBottler, { BOTTLE_TYPES } from "../src/core/hooks/useBottler";
+import { targetChain } from "../src/core/providers/Web3Provider";
+import { BottleType, BottleTypes } from "../src/core/hooks/useBottler";
+import RouteButton from "../src/components/RouteButton";
+import UIContext from "../src/core/providers/UIProvider/context";
 
 const Homepage = () => {
-  const web3Provider = useContext(Web3Context);
   const overlay = useContext(overlayContext);
+  const ui = useContext(UIContext);
+  const bottler = useBottler({
+    MilkAddress: MILK_ADDRESS,
+    BottlerAddress: BOTTLER_ADDRESS,
+    targetChain: targetChain,
+  });
 
   const handleCardClick = (bottle: BottleType) => {
     console.log(bottle.name);
@@ -34,6 +45,33 @@ const Homepage = () => {
       props: { bottle: bottle },
     });
   };
+
+  const handlePourClick = ({
+    item,
+    qty,
+  }: {
+    item: BottleType;
+    qty?: number;
+  }) => {
+    overlay.toggleModal({
+      type: MODAL_TYPES.POUR_BOTTLE,
+      props: { bottle: item, qty: qty },
+    });
+  };
+
+  const handleRefillClick = ({
+    item,
+    qty,
+  }: {
+    item: BottleType;
+    qty?: number;
+  }) => {
+    overlay.toggleModal({
+      type: MODAL_TYPES.FILL_BOTTLE,
+      props: { bottle: item },
+    });
+  };
+
   const BottleCard = ({
     bottle,
     isDisabled,
@@ -53,6 +91,8 @@ const Homepage = () => {
         transition="0.2s"
         _hover={{ transform: "scale(1.05)", transition: "0.1s" }}
         position={"relative"}
+        my={4}
+        mx={4}
       >
         <Box
           borderRadius={"xl"}
@@ -116,7 +156,71 @@ const Homepage = () => {
     );
   };
 
-
+  const InventoryItem = ({
+    item,
+    isFull,
+    qty,
+  }: {
+    item: BottleType;
+    isFull: Boolean;
+    qty: number;
+  }) => {
+    return (
+      <Stack
+        bgColor="orange.900"
+        w="100%"
+        px="22px"
+        borderRadius={"xl"}
+        boxShadow={"md"}
+        minH="44px"
+        direction={ui.isMobileView ? "column" : "row"}
+        spacing={ui.isMobileView ? 2 : "inherit"}
+        alignItems={"center"}
+        py={ui.isMobileView ? 4 : "inherit"}
+      >
+        <Text fontWeight={"600"} textColor={"white.100"}>
+          {isFull ? "Full" : "Empty"} {item.name} bottles: {qty}
+        </Text>
+        <Spacer />
+        {!isFull && (
+          <Button
+            colorScheme="blue"
+            size="sm"
+            variant={"solid"}
+            onClick={() => {
+              handleRefillClick({ item, qty });
+            }}
+          >
+            Refill
+          </Button>
+        )}
+        {qty > 0 && isFull && (
+          <Button
+            colorScheme="blue"
+            size="sm"
+            variant={"solid"}
+            onClick={() => {
+              handlePourClick({ item, qty });
+            }}
+          >
+            Open
+          </Button>
+        )}
+        {(!isFull || qty > 0) && (
+          <RouteButton
+            isDisabled={qty > 0 ? false : true}
+            size="sm"
+            variant="solid"
+            colorScheme="purple"
+            href="http://opensea.io"
+          >
+            List on opensea
+          </RouteButton>
+        )}
+      </Stack>
+    );
+  };
+  console.log("bottler.erc20Balance", bottler.erc20Balance);
   return (
     <>
       <Center w="100%" bgColor="blue.900">
@@ -129,152 +233,88 @@ const Homepage = () => {
           p={4}
           spacing={8}
         >
-          <Heading>
-            Your account UNIM tokens: {web3Provider.erc20Balance}{" "}
-          </Heading>
+          <Heading>Your account UNIM tokens: {bottler.erc20Balance} </Heading>
           <Stack
             maxW="1024px"
             px={4}
             bgColor={"purple.200"}
-            h="600px"
+            h={ui.isMobileView ? "auto" : "600px"}
             w="100%"
             placeSelf={"center"}
             borderRadius="lg"
             boxShadow="xl"
           >
             <Heading>Fill your milk in to bottles</Heading>
-            <Stack direction={"row"} justifyContent={"space-evenly"}>
+            <Flex
+              direction={"row"}
+              flexWrap={ui.isMobileView ? "wrap" : "nowrap"}
+              justifyContent={ui.isMobileView ? "center" : "space-evenly"}
+              spacing={ui.isMobileView ? 0 : "inherit"}
+              alignItems={"baseline"}
+            >
               <BottleCard
-                bottle={BOTTLE_TYPES.small}
+                bottle={BOTTLE_TYPES.medium}
                 isDisabled={
-                  Number(web3Provider.erc20Balance) < BOTTLE_TYPES.small.volume
+                  Number(bottler.erc20Balance) < BOTTLE_TYPES.small.volume
                 }
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.medium}
                 isDisabled={
-                  Number(web3Provider.erc20Balance) < BOTTLE_TYPES.medium.volume
+                  Number(bottler.erc20Balance) < BOTTLE_TYPES.medium.volume
                 }
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.large}
                 isDisabled={
-                  Number(web3Provider.erc20Balance) < BOTTLE_TYPES.large.volume
+                  Number(bottler.erc20Balance) < BOTTLE_TYPES.large.volume
                 }
               />
-            </Stack>
+            </Flex>
           </Stack>
           <Stack
             maxW="1024px"
             px={4}
             bgColor={"purple.200"}
-            h="600px"
+            h={ui.isMobileView ? "inherit" : "600px"}
             w="100%"
             placeSelf={"center"}
             borderRadius="lg"
             boxShadow="xl"
+            pb={ui.isMobileView ? "100px" : "inherit"}
           >
             <Heading>My inventory</Heading>
             <Stack direction={"column"} justifyContent={"space-evenly"}>
-              <Stack
-                bgColor="pink.400"
-                w="100%"
-                px="22px"
-                minH="44px"
-                direction="row"
-                alignItems={"center"}
-              >
-                <Text>
-                  {" "}
-                  Number of full small bottles: {web3Provider.fullBottles[0]}
-                </Text>
-                <Spacer />
-                {web3Provider.fullBottles[0] && (
-                  <Button
-                    colorScheme="green"
-                    size="sm"
-                    onClick={() => {
-                      web3Provider.emptySmallBottles(
-                        web3Provider.fullBottles[0]
-                      );
-                    }}
-                  >
-                    Empty now!
-                  </Button>
-                )}
-              </Stack>
-              <Stack
-                bgColor="pink.400"
-                w="100%"
-                px="22px"
-                minH="44px"
-                direction="row"
-                alignItems={"center"}
-              >
-                <Text>
-                  {" "}
-                  Number of full medium bottles: {web3Provider.fullBottles[1]}
-                </Text>
-                <Spacer />
-                {web3Provider.fullBottles[1] && (
-                  <Button
-                    colorScheme="green"
-                    size="sm"
-                    onClick={() => {
-                      web3Provider.emptyMediumBottles(
-                        web3Provider.fullBottles[1]
-                      );
-                    }}
-                  >
-                    Empty now!
-                  </Button>
-                )}
-              </Stack>
-              <Stack
-                bgColor="pink.400"
-                w="100%"
-                px="22px"
-                minH="44px"
-                direction="row"
-                alignItems={"center"}
-              >
-                <Text>
-                  {" "}
-                  Number of full large bottles: {web3Provider.fullBottles[2]}
-                </Text>
-                <Spacer />
-                {web3Provider.fullBottles[2] && (
-                  <Button
-                    colorScheme="green"
-                    size="sm"
-                    onClick={() => {
-                      web3Provider.emptyLargeBottles(
-                        web3Provider.fullBottles[2]
-                      );
-                    }}
-                  >
-                    Empty now!
-                  </Button>
-                )}
-              </Stack>
-              <Stack bgColor="pink.400" w="100%" px="22px" minH="44px">
-                <Text>
-                  {" "}
-                  Number of empty small bottles: {web3Provider.emptyBottles[0]}
-                </Text>
-              </Stack>
-              <Stack bgColor="pink.400" w="100%" px="22px" minH="44px">
-                <Text>
-                  {" "}
-                  Number of empty medium bottles: {web3Provider.emptyBottles[1]}
-                </Text>
-              </Stack>
-              <Stack bgColor="pink.400" w="100%" px="22px" minH="44px">
-                <Text>
-                  {" "}
-                  Number of empty large bottles: {web3Provider.emptyBottles[2]}
-                </Text>
-              </Stack>
+              <InventoryItem
+                item={BOTTLE_TYPES.small}
+                isFull={true}
+                qty={bottler.fullBottles[0]}
+              />
+              <InventoryItem
+                item={BOTTLE_TYPES.medium}
+                isFull={true}
+                qty={bottler.fullBottles[1]}
+              />
+              <InventoryItem
+                item={BOTTLE_TYPES.large}
+                isFull={true}
+                qty={bottler.fullBottles[2]}
+              />
+              <InventoryItem
+                item={BOTTLE_TYPES.small}
+                isFull={false}
+                qty={bottler.emptyBottles[0]}
+              />
+              <InventoryItem
+                item={BOTTLE_TYPES.small}
+                isFull={false}
+                qty={bottler.emptyBottles[1]}
+              />
+              <InventoryItem
+                item={BOTTLE_TYPES.small}
+                isFull={false}
+                qty={bottler.emptyBottles[2]}
+              />
             </Stack>
           </Stack>
         </Stack>

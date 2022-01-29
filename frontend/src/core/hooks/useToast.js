@@ -8,6 +8,7 @@ const useToast = () => {
 
   const toast = useCallback(
     (message, type, title) => {
+      console.log("msg", message, "type", type, "title", title);
       const userTitle = title ?? message?.response?.statusText ?? type;
 
       const userMessage =
@@ -25,6 +26,15 @@ const useToast = () => {
         });
       }
 
+      console.log(
+        "toast:",
+        userTitle,
+        userMessage,
+        type,
+        userTitle,
+        userMessage,
+        type
+      );
       chakraToast({
         id: `${userTitle}${userMessage}${type}`,
         position: "bottom",

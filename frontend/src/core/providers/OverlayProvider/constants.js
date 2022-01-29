@@ -9,6 +9,7 @@ export const MODAL_TYPES = {
   NEW_SUBSCRIPTON: 7,
   UPLOAD_ABI: 8,
   FILL_BOTTLE: 9,
+  POUR_BOTTLE: 10,
 };
 
 export const DRAWER_TYPES = {

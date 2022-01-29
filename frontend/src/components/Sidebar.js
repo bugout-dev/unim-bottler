@@ -8,7 +8,17 @@ import {
 } from "react-pro-sidebar";
 import { useContext } from "react";
 import RouterLink from "next/link";
-import { Flex, Image, IconButton, Divider, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  Image,
+  IconButton,
+  Divider,
+  Text,
+  ButtonGroup,
+  Button,
+  Badge,
+  Stack,
+} from "@chakra-ui/react";
 import UIContext from "../core/providers/UIProvider/context";
 import React from "react";
 import {
@@ -29,10 +39,11 @@ import useDashboard from "../core/hooks/useDashboard";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import moment from "moment";
+import Web3Context from "../core/providers/Web3Provider/context";
 
 const Sidebar = () => {
   const ui = useContext(UIContext);
-  const { dashboardsListCache } = useDashboard();
+  const web3Provider = useContext(Web3Context);
   const overlay = useContext(OverlayContext);
   return (
     <ProSidebar
@@ -115,32 +126,53 @@ const Sidebar = () => {
           {ui.isLoggedIn ||
             (!IS_AUTHENTICATION_REQUIRED && (
               <>
-                <Text
-                  textColor="gray.300"
-                  size="sm"
-                  justifyContent="center"
-                  fontWeight="600"
-                  pl={8}
-                  pt={3}
-                >
-                  Dashboards
-                </Text>
-                <Menu iconShape="square">
-                  <>
-                    {dashboardsListCache.data &&
-                      dashboardsListCache.data.data.resources.map(
-                        (dashboard) => {
-                          return (
-                            <MenuItem icon={<MdDashboard />} key={v4()}>
-                              <RouterLink href={`/dashboard/${dashboard?.id}`}>
-                                {dashboard.resource_data.name}
-                              </RouterLink>
-                            </MenuItem>
-                          );
-                        }
-                      )}
-                  </>
-                </Menu>
+                {/* Not authenticated part of sidebar menu */}
+                <ButtonGroup variant="solid" spacing={4} pr={16}>
+                  {web3Provider.buttonText !==
+                    web3Provider.WALLET_STATES.CONNECTED && (
+                    <Button
+                      colorScheme={
+                        web3Provider.buttonText ===
+                        web3Provider.WALLET_STATES.CONNECTED
+                          ? "green"
+                          : "green"
+                      }
+                      onClick={web3Provider.onConnectWalletClick}
+                    >
+                      {web3Provider.buttonText}
+                      {"  "}
+                      <Image
+                        pl={2}
+                        h="24px"
+                        src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
+                      />
+                    </Button>
+                  )}
+                  {web3Provider.buttonText ===
+                    web3Provider.WALLET_STATES.CONNECTED && (
+                    <Flex direction="column">
+                      <Badge
+                        ml={4}
+                        maxW="200px"
+                        colorScheme={"green"}
+                        variant={"subtle"}
+                        fontSize={"sm"}
+                      >
+                        Connected
+                      </Badge>
+                      <Badge
+                        ml={4}
+                        mt={2}
+                        maxW="200px"
+                        colorScheme={"orange"}
+                        variant={"subtle"}
+                        fontSize={"sm"}
+                        wordBreak={"break-word"}
+                        whiteSpace={"normal"}
+                      >{` ${web3Provider.account}`}</Badge>
+                    </Flex>
+                  )}
+                </ButtonGroup>
               </>
             ))}
           <Divider

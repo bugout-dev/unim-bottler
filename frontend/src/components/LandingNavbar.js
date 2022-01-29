@@ -75,7 +75,7 @@ const LandingNavbar = () => {
                   web3Provider.buttonText ===
                   web3Provider.WALLET_STATES.CONNECTED
                     ? "green"
-                    : "orange"
+                    : "green"
                 }
                 onClick={web3Provider.onConnectWalletClick}
               >

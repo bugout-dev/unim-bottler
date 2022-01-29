@@ -50,6 +50,7 @@ const NewSubscription = React.lazy(() =>
 
 const UploadABI = React.lazy(() => import("../../../components/UploadABI"));
 const FillBottle = React.lazy(() => import("../../../components/FillBottle"));
+const PourBottle = React.lazy(() => import("../../../components/PourBottle"));
 
 const OverlayProvider = ({ children }) => {
   const { createDashboard } = useDashboard();
@@ -173,12 +174,13 @@ const OverlayProvider = ({ children }) => {
 
         <ModalContent borderRadius="48px" bgColor="purple.900">
           <ModalHeader
-            bgColor="yellow.900"
+            bgColor="pink.900"
             textColor="white.300"
             py={2}
             fontSize="lg"
             borderTopRadius="48px"
             h="96px"
+            boxShadow={"lg"}
           >
             {modal.type === MODAL_TYPES.NEW_SUBSCRIPTON &&
               "Subscribe to a new address"}
@@ -187,9 +189,12 @@ const OverlayProvider = ({ children }) => {
             {modal.type === MODAL_TYPES.LOGIN && "Login now"}
             {modal.type === MODAL_TYPES.SIGNUP && "Create an account"}
             {modal.type === MODAL_TYPES.UPLOAD_ABI && "Assign ABI"}
-            {modal.type === MODAL_TYPES.FILL_BOTTLE && "Fill bottle with UNIM"}
+            {modal.type === MODAL_TYPES.FILL_BOTTLE &&
+              `Fill ${modal.props.bottle.name} bottles with UNIML`}
+            {modal.type === MODAL_TYPES.POUR_BOTTLE &&
+              `Open ${modal.props.bottle.name} bottles with UNIML`}
           </ModalHeader>
-          <Divider />
+          {modal.type !== MODAL_TYPES.FILL_BOTTLE && modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}
           <ModalCloseButton />
           <ModalBody
             zIndex={100002}
@@ -225,6 +230,9 @@ const OverlayProvider = ({ children }) => {
               )}
               {modal.type === MODAL_TYPES.FILL_BOTTLE && (
                 <FillBottle {...modal.props} />
+              )}
+              {modal.type === MODAL_TYPES.POUR_BOTTLE && (
+                <PourBottle {...modal.props} />
               )}
             </Suspense>
           </ModalBody>

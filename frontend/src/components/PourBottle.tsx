@@ -19,7 +19,7 @@ import { chains } from "../core/providers/Web3Provider";
 import overlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
-const FillBottle = (props: { bottle: BottleType }) => {
+const PourBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
   const toast = useToast();
   console.log("FillBottle", props);
@@ -60,12 +60,14 @@ const FillBottle = (props: { bottle: BottleType }) => {
 
   React.useEffect(() => {
     if (
-      bottler.fillBottles.status === txStatus.ERROR ||
-      bottler.fillBottles.status === txStatus.SUCCESS
+      bottler.pourFullBottles.status === txStatus.ERROR ||
+      bottler.pourFullBottles.status === txStatus.SUCCESS
     ) {
       toggleModal({ type: MODAL_TYPES.OFF });
     }
-  }, [bottler.fillBottles.status]);
+  }, [bottler.pourFullBottles.status]);
+
+  const hasBottles = bottler.fullBottles[props.bottle.poolId];
 
   return (
     <Center>
@@ -84,13 +86,13 @@ const FillBottle = (props: { bottle: BottleType }) => {
           justifyContent={"space-evenly"}
         >
           <Text fontSize="18px" fontWeight={500}>
-            How many bottles would you like to fill?
+            How many bottles would you like to open?
           </Text>
           <NumberInput
             defaultValue={1}
             bgColor={"purple.500"}
             min={1}
-            max={1000001}
+            max={hasBottles}
             w="123px"
             onChange={(valueAsString) => setNumber(Number(valueAsString))}
           >
@@ -105,49 +107,26 @@ const FillBottle = (props: { bottle: BottleType }) => {
           </NumberInput>
         </Stack>
         <Text fontSize={"sm"}>
-          Each {props.bottle.name} bottle contains {props.bottle.volume} In
-          order to fill a bottle, bottler must have your approval to use{" "}
-          {requiredMilk} of your UNIM tokens. Currently you have approved{" "}
-          {bottler.allowance}.{" "}
-          {valueToApprove !== 0 && `We need ${valueToApprove}`}
+          Each {props.bottle.name} bottle contains {props.bottle.volume} UNIML.
+          Performing this action will give you equivalent amount of UNIML... and
+          an empty bottle
         </Text>
-        {valueToApprove !== 0 && (
-          <Button
-            isLoading={bottler.approveSpendMilk.status === txStatus.LOADING}
-            isDisabled={!canAfford}
-            placeSelf={"center"}
-            colorScheme="blue"
-            variant="solid"
-            onClick={() =>
-              bottler.approveSpendMilk.send(
-                BOTTLER_ADDRESS,
-                web3Provider.web3.utils.toWei(
-                  web3Provider.web3.utils.toBN(requiredMilk)
-                )
-              )
-            }
-          >
-            {!canAfford && "You don't have enough milk!"}
-            {canAfford && "Approve"}
-          </Button>
-        )}
-        {valueToApprove === 0 && (
-          <Button
-            isLoading={bottler.fillBottles.status === txStatus.LOADING}
-            isDisabled={!canAfford}
-            placeSelf={"center"}
-            colorScheme="green"
-            variant="solid"
-            onClick={() =>
-              // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
-              bottler.fillBottles.send(web3Provider.web3.utils.toBN(numberOfBottles))
-            }
-          >
-            Submit
-          </Button>
-        )}
+
+        <Button
+          isLoading={bottler.pourFullBottles.status === txStatus.LOADING}
+          isDisabled={!canAfford}
+          placeSelf={"center"}
+          colorScheme="green"
+          variant="solid"
+          onClick={() =>
+            // bottler.fillBottles.send(props.bottle.poolId, numberOfBottles)
+            bottler.pourFullBottles.send(numberOfBottles)
+          }
+        >
+          Submit
+        </Button>
       </Stack>
     </Center>
   );
 };
-export default FillBottle;
+export default PourBottle;

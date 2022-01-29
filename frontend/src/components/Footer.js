@@ -78,19 +78,23 @@ const Footer = () => (
         spacing={8}
       >
         <Stack spacing={6}>
-          <Box>
-            <Link href="/" alignSelf="center">
-              <ChakraImage
-                alignSelf="center"
-                // as={Link}
-                // to="/"
-                h="2.5rem"
-                minW="2.5rem"
-                src={WHITE_LOGO_W_TEXT_URL}
-                alt="Logo"
-              />
-            </Link>
-          </Box>
+          <Stack direction={"row"}>
+            <Box>
+              <Link href="/" alignSelf="center">
+                <ChakraImage
+                  alignSelf="center"
+                  // as={Link}
+                  // to="/"
+                  h="2.5rem"
+                  minW="2.5rem"
+                  src={WHITE_LOGO_W_TEXT_URL}
+                  alt="Logo"
+                />
+              </Link>
+            </Box>
+              <Text >This is the way. Milky way.</Text>
+
+          </Stack>
           <Text fontSize={"sm"}>
             © {moment().year()} {COPYRIGHT_NAME} All rights reserved
           </Text>
