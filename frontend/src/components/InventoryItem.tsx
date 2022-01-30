@@ -72,7 +72,7 @@ const InventoryItem = ({
           <Button
             colorScheme="purple"
             size="sm"
-            isDisabled={qty > 0 ? true : false}
+            isDisabled={qty > 0 ? false : true}
             variant={"solid"}
             onClick={() => {
               handlePourClick({ item, qty });
@@ -81,13 +81,27 @@ const InventoryItem = ({
             Open
           </Button>
         )}
-        {true && (
+        {isFull && (
           <RouteButton
             isDisabled={qty > 0 ? false : true}
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
             href={`http://opensea.io/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
+            bgColor={qty > 0 ? undefined : "orange.1200"}
+          >
+            List on opensea
+          </RouteButton>
+        )}
+        {!isFull && (
+          <RouteButton
+            isDisabled={qty > 0 ? false : true}
+            size="sm"
+            variant="solid"
+            colorScheme={qty > 0 ? "blue" : "purple"}
+            href={`http://opensea.io/${TERMINUS_ADDRESS}/${
+              item.terminusPoolId - 3
+            }`}
             bgColor={qty > 0 ? undefined : "orange.1200"}
           >
             List on opensea
