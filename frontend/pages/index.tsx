@@ -39,7 +39,7 @@ const Homepage = () => {
         <Flex
           w="100%"
           maxW="1800px"
-          minH="100vh"
+          minH="75vh"
           direction="row"
           placeContent="center"
           p={4}
@@ -76,7 +76,9 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.small.poolId]
                 )}
-                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.small.poolId])}
+                fullBottlePrice={Number(
+                  bottler.fullBottlesPrices[BOTTLE_TYPES.small.poolId]
+                )}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.medium}
@@ -89,7 +91,9 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.medium.poolId]
                 )}
-                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.medium.poolId])}
+                fullBottlePrice={Number(
+                  bottler.fullBottlesPrices[BOTTLE_TYPES.medium.poolId]
+                )}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.large}
@@ -102,7 +106,9 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.large.poolId]
                 )}
-                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.large.poolId])}
+                fullBottlePrice={Number(
+                  bottler.fullBottlesPrices[BOTTLE_TYPES.large.poolId]
+                )}
               />
             </Flex>
           </Stack>
@@ -180,6 +186,12 @@ const Homepage = () => {
             </Stack>
           </Stack>
         </Flex>
+      </Center>
+      <Center w="100%" bgColor="blue.1200">
+        <Image
+          ml={2}
+          src="https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/unim-onboarding.png"
+        />
       </Center>
       <Stack />
     </>

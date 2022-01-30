@@ -84,7 +84,7 @@ export const AWS_ASSETS_PATH = `assets/path`;
 /*
 White Logo with text URL (.png)
 */
-export const WHITE_LOGO_W_TEXT_URL = `https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png`;
+export const WHITE_LOGO_W_TEXT_URL = `https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/bottler-logo.png`;
 
 /*
 White Logo URL (.svg)
