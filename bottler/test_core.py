@@ -6,7 +6,7 @@ from brownie import accounts, network
 from bottler.BottlerFacet import BottlerFacet
 from bottler.OwnershipFacet import OwnershipFacet
 
-from .core import facet_cut, gogogo
+from .core import gogogo
 
 from . import MockTerminus, MockErc20
 

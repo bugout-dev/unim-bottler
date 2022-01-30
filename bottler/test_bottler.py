@@ -6,8 +6,6 @@ from brownie import accounts
 from brownie.exceptions import VirtualMachineError
 
 
-from . import BottlerFacet
-from .core import facet_cut
 from .test_core import BottlerTestCase
 
 
