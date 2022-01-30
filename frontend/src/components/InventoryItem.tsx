@@ -58,7 +58,7 @@ const InventoryItem = ({
         {!isFull && (
           <Button
             size="sm"
-            isDisabled={qty === 0}
+            isDisabled={!qty}
             variant={"solid"}
             colorScheme="purple"
             onClick={() => {
