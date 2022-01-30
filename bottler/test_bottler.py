@@ -1,3 +1,4 @@
+from multiprocessing import pool
 from typing import List
 import unittest
 
@@ -220,17 +221,27 @@ class TestBottlerContract(BottlerTestCase):
 
         # Empty bottles
         self.bottler.empty_bottles(pool_number, 2, {"from": filler_account})
+        empty_bottle_inventory = self.bottler.get_empty_bottle_inventory(
+            filler_account.address
+        )
+
+        full_bottle_inventory = self.bottler.get_full_bottle_inventory(
+            filler_account.address
+        )
 
         with self.assertRaises(VirtualMachineError):
             # ERC1155WithTerminusStorage: burn amount exceeds balance
             self.bottler.empty_bottles(
                 pool_number - 1,
-                1,
+                empty_bottle_inventory[pool_number - 1] + 1,
                 {"from": filler_account},
             )
         with self.assertRaises(VirtualMachineError):
-            # BottlerFacet:emptyBottles - Contract ran out of UNIM, it cannot happen
-            self.bottler.empty_bottles(pool_number, 2, {"from": filler_account})
+            self.bottler.empty_bottles(
+                pool_number,
+                full_bottle_inventory[pool_number] + 2,
+                {"from": filler_account},
+            )
 
         filler_balance_2 = filler_account.balance()
         controller_balance_2 = accounts[0].balance()
@@ -427,6 +438,104 @@ class TestBottlerContract(BottlerTestCase):
                 *filler_empty_inventory_2[:2],
                 filler_empty_inventory_2[2] - 1,
             ],
+        )
+
+    def test_bottle_supply_view(self):
+        capacities_0 = list(self.bottler.get_bottle_capacities())
+        full_bottle_supplies_0 = list(self.bottler.get_full_bottle_supplies())
+        empty_bottle_supplies_0 = list(self.bottler.get_empty_bottle_supplies())
+
+        filler_account = accounts[1]
+        small_unim_value = self.bottler.get_volume_by_index(0)
+        medium_unim_value = self.bottler.get_volume_by_index(1)
+        large_unim_value = self.bottler.get_volume_by_index(2)
+
+        small_bottles = 2
+        medium_bottles = 5
+        large_bottles = 1
+
+        required_unim = (
+            small_bottles * small_unim_value
+            + medium_bottles * medium_unim_value
+            + large_bottles * large_unim_value
+        )
+
+        self.unim.mint(filler_account.address, required_unim, {"from": accounts[0]})
+        self.unim.approve(
+            self.bottler.address,
+            required_unim,
+            {"from": filler_account},
+        )
+
+        self.bottler.fill_bottles(
+            0,
+            small_bottles,
+            {
+                "from": filler_account,
+                "value": small_bottles * self.full_bottle_prices[0],
+            },
+        )
+        self.bottler.fill_bottles(
+            1,
+            medium_bottles,
+            {
+                "from": filler_account,
+                "value": medium_bottles * self.full_bottle_prices[1],
+            },
+        )
+        self.bottler.fill_bottles(
+            2,
+            large_bottles,
+            {
+                "from": filler_account,
+                "value": large_bottles * self.full_bottle_prices[2],
+            },
+        )
+
+        capacities_1 = list(self.bottler.get_bottle_capacities())
+        full_bottle_supplies_1 = list(self.bottler.get_full_bottle_supplies())
+        empty_bottle_supplies_1 = list(self.bottler.get_empty_bottle_supplies())
+
+        self.assertListEqual(capacities_1, capacities_0)
+        self.assertListEqual(
+            full_bottle_supplies_1,
+            [
+                full_bottle_supplies_0[0] + small_bottles,
+                full_bottle_supplies_0[1] + medium_bottles,
+                full_bottle_supplies_0[2] + large_bottles,
+            ],
+        )
+        self.assertListEqual(empty_bottle_supplies_1, empty_bottle_supplies_0)
+
+        self.bottler.empty_bottles(0, 1, {"from": filler_account})
+        self.bottler.empty_bottles(1, 1, {"from": filler_account})
+        self.bottler.empty_bottles(2, 1, {"from": filler_account})
+
+        capacities_2 = list(self.bottler.get_bottle_capacities())
+        full_bottle_supplies_2 = list(self.bottler.get_full_bottle_supplies())
+        empty_bottle_supplies_2 = list(self.bottler.get_empty_bottle_supplies())
+
+        self.assertListEqual(capacities_2, capacities_1)
+        self.assertListEqual(
+            full_bottle_supplies_2,
+            [
+                full_bottle_supplies_1[0] - 1,
+                full_bottle_supplies_1[1] - 1,
+                full_bottle_supplies_1[2] - 1,
+            ],
+        )
+        self.assertListEqual(
+            empty_bottle_supplies_2,
+            [
+                empty_bottle_supplies_1[0] + 1,
+                empty_bottle_supplies_1[1] + 1,
+                empty_bottle_supplies_1[2] + 1,
+            ],
+        )
+        self.unim.approve(
+            self.bottler.address,
+            0,
+            {"from": filler_account},
         )
 
 
