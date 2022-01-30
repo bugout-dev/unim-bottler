@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Box, Heading, Text, Stack, chakra, Image } from "@chakra-ui/react";
+import { Box, Heading, Text, Stack, chakra, Image, Flex } from "@chakra-ui/react";
 import { BottleType } from "../core/hooks/useBottler";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
@@ -30,7 +30,8 @@ const BottleCard = ({
       borderRadius="xl"
       boxShadow={"lg"}
       w="240px"
-      h="360px"
+      h="420px"
+      maxH="420px"
       bgColor="purple.900"
       backgroundBlendMode={"darken"}
       transition="0.2s"
