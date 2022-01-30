@@ -81,7 +81,7 @@ const BottleCard = ({
             </Text>
           </Stack>
           <Text fontWeight={800} fontSize={"sm"} px={4}>
-            {bottlesLeft} presale bottles left)
+            {bottlesLeft} presale bottles left
           </Text>
         </Stack>
         <chakra.span
