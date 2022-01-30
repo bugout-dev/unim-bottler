@@ -193,7 +193,7 @@ const OverlayProvider = ({ children }) => {
             {modal.type === MODAL_TYPES.FILL_BOTTLE &&
               `Fill ${modal.props.bottle.name} bottles with UNIM`}
             {modal.type === MODAL_TYPES.POUR_BOTTLE &&
-              `Open ${modal.props.bottle.name} bottles with UNIM`}
+              `Open ${modal.props.bottle.name} bottles to extract UNIM`}
           </ModalHeader>
           {modal.type !== MODAL_TYPES.FILL_BOTTLE &&
             modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}
