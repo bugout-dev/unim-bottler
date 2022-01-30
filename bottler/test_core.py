@@ -84,11 +84,11 @@ class BottlerTestCase(BottlerDeploymentTestCase):
         }
         bottler.set_empty_bottle_pool_ids(cls.pool_ids["empty"], {"from": accounts[0]})
         bottler.set_full_bottle_pool_ids(cls.pool_ids["full"], {"from": accounts[0]})
-        # Using DECIMALS/100 so we don't have to mess with value per account in Ganache config via Brownie.
+        # Using DECIMALS/1000000 so we don't have to mess with value per account in Ganache config via Brownie.
         cls.full_bottle_prices = [
-            1 * DECIMALS / 100,
-            4 * DECIMALS / 100,
-            24 * DECIMALS / 100,
+            1 * DECIMALS / 1000000,
+            4 * DECIMALS / 1000000,
+            24 * DECIMALS / 1000000,
         ]
         bottler.set_full_bottle_prices(cls.full_bottle_prices, {"from": accounts[0]})
 

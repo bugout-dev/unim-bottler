@@ -11,6 +11,9 @@ from .core import facet_cut
 from .test_core import BottlerTestCase
 
 
+MAX_UINT256 = 2 ** 256 - 1
+
+
 class TestBottlerContract(BottlerTestCase):
     def test_fill_small_bottles_with_no_value(self):
         pool_number = 0
@@ -536,6 +539,102 @@ class TestBottlerContract(BottlerTestCase):
             self.bottler.address,
             0,
             {"from": filler_account},
+        )
+
+
+class TestCapacityLimits(BottlerTestCase):
+    """
+    This test suite tests what happens when the bottle capacities have been reached.
+    """
+
+    def test_fill_small_bottles_fails(self):
+        capacities = list(self.bottler.get_bottle_capacities())
+
+        # Overmint UNIM to filler account and approve bottler
+        unim_volumes = [self.bottler.get_volume_by_index(i) for i in range(3)]
+        unim_value = sum(
+            (inventory + 10) * volume
+            for inventory, volume in zip(capacities, unim_volumes)
+        )
+        self.unim.mint(accounts[1].address, 3 * unim_value, {"from": accounts[0]})
+        self.unim.approve(
+            self.bottler.address,
+            unim_value,
+            {"from": accounts[1]},
+        )
+
+        # Mint UNIM to second account and approve bottler
+        self.unim.mint(accounts[2].address, 2 * unim_volumes[0], {"from": accounts[0]})
+        self.unim.approve(
+            self.bottler.address,
+            2 * unim_volumes[0],
+            {"from": accounts[2]},
+        )
+
+        # Fill bottles to capacities - 1
+        for i in range(3):
+            self.bottler.fill_bottles(
+                i,
+                capacities[i],
+                {
+                    "from": accounts[1],
+                    "value": capacities[i] * self.full_bottle_prices[i],
+                },
+            )
+            self.bottler.empty_bottles(i, 1, {"from": accounts[1]})
+
+        with self.assertRaises(VirtualMachineError):
+            self.bottler.fill_bottles(
+                0, 1, {"from": accounts[1], "value": self.full_bottle_prices[0]}
+            )
+
+        with self.assertRaises(VirtualMachineError):
+            self.bottler.fill_bottles(
+                1, 1, {"from": accounts[1], "value": self.full_bottle_prices[0]}
+            )
+
+        with self.assertRaises(VirtualMachineError):
+            self.bottler.fill_bottles(
+                2, 1, {"from": accounts[1], "value": self.full_bottle_prices[0]}
+            )
+
+        self.bottler.fill_empty_bottles(0, 1, {"from": accounts[1]})
+        self.bottler.fill_empty_bottles(1, 1, {"from": accounts[1]})
+        self.bottler.fill_empty_bottles(2, 1, {"from": accounts[1]})
+
+        full_bottle_supplies = list(self.bottler.get_full_bottle_supplies())
+        self.assertListEqual(full_bottle_supplies, capacities)
+
+        empty_bottle_supplies = list(self.bottler.get_empty_bottle_supplies())
+        self.assertListEqual(empty_bottle_supplies, [0, 0, 0])
+
+        self.bottler.empty_bottles(0, 1, {"from": accounts[1]})
+
+        # Test transfer empty bottle to another account, which fills it.
+        self.terminus.safe_transfer_from(
+            accounts[1].address,
+            accounts[2].address,
+            self.bottler.get_empty_bottle_pool_ids()[0],
+            1,
+            "",
+            {"from": accounts[1]},
+        )
+        self.assertListEqual(
+            list(self.bottler.get_full_bottle_inventory(accounts[2].address)),
+            [0, 0, 0],
+        )
+        self.assertListEqual(
+            list(self.bottler.get_empty_bottle_inventory(accounts[2].address)),
+            [1, 0, 0],
+        )
+        self.bottler.fill_empty_bottles(0, 1, {"from": accounts[2]})
+        self.assertListEqual(
+            list(self.bottler.get_full_bottle_inventory(accounts[2].address)),
+            [1, 0, 0],
+        )
+        self.assertListEqual(
+            list(self.bottler.get_empty_bottle_inventory(accounts[2].address)),
+            [0, 0, 0],
         )
 
 
