@@ -291,7 +291,7 @@ def release_the_kraken(
         )
 
     bottler.set_up(unicorn_milk_address, terminus_address, transaction_config)
-    bottler.set_bottle_capacities([5000, 1000, 500], transaction_config)
+    bottler.set_bottle_capacities([5000, 2000, 500], transaction_config)
 
     bottler.set_empty_bottle_pool_ids(result["pools"]["empty"], transaction_config)
     bottler.set_full_bottle_pool_ids(result["pools"]["full"], transaction_config)

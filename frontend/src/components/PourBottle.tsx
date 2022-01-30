@@ -22,7 +22,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
-  const [canAfford, setCanAfford] = React.useState<boolean>(true);
   const bottler = useBottler({
     MilkAddress: UNIM_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
@@ -31,21 +30,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
         ? chains.matic_mumbai
         : chains.matic,
   });
-
-  React.useEffect(() => {
-    const erc20Balance = Number(bottler.erc20Balance);
-    setCanAfford(
-      numberOfBottles * bottler.bottleVolumes[props.bottle.poolId] <=
-        erc20Balance
-        ? true
-        : false
-    );
-  }, [
-    numberOfBottles,
-    props.bottle,
-    bottler.erc20Balance,
-    bottler.bottleVolumes,
-  ]);
 
   React.useEffect(() => {
     if (
@@ -100,14 +84,14 @@ const PourBottle = (props: { bottle: BottleType }) => {
           {bottler.bottleVolumes[props.bottle.poolId]} UNIML. Performing this
           action will give you{" "}
           {bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles} amount
-          of UNIML... and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
+          of UNIML, and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
           bottle
-          {numberOfBottles > 1 && `s`}
+          {numberOfBottles > 1 && `s`}.
         </Text>
 
         <Button
           isLoading={bottler.pourFullBottles.status === txStatus.LOADING}
-          isDisabled={!canAfford}
+          isDisabled={!numberOfBottles}
           placeSelf={"center"}
           colorScheme="green"
           variant="solid"

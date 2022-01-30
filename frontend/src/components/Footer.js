@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import RouterLink from "next/link";
 import {
-  WHITE_LOGO_W_TEXT_URL,
+  WHITE_LOGO_SVG,
   ALL_NAV_PATHES,
   FOOTER_COLUMNS,
   SOCIAL_LINKS,
@@ -87,7 +87,7 @@ const Footer = () => (
                   // to="/"
                   h="2.5rem"
                   minW="2.5rem"
-                  src={WHITE_LOGO_W_TEXT_URL}
+                  src={WHITE_LOGO_SVG}
                   alt="Logo"
                 />
               </Link>

@@ -58,7 +58,7 @@ const InventoryItem = ({
         {!isFull && (
           <Button
             size="sm"
-            isDisabled={qty > 0 ? true : false}
+            isDisabled={!qty}
             variant={"solid"}
             colorScheme="purple"
             onClick={() => {
@@ -83,28 +83,28 @@ const InventoryItem = ({
         )}
         {isFull && (
           <RouteButton
-            isDisabled={qty > 0 ? false : true}
+            isDisabled={false}
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
-            href={`http://opensea.io/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
-            bgColor={qty > 0 ? undefined : "orange.1200"}
+            href={`http://opensea.io/assets/matic/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
+            isExternal={true}
           >
-            List on opensea
+            View on opensea
           </RouteButton>
         )}
         {!isFull && (
           <RouteButton
-            isDisabled={qty > 0 ? false : true}
+            isDisabled={false}
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
-            href={`http://opensea.io/${TERMINUS_ADDRESS}/${
+            href={`http://opensea.io/assets/matic/${TERMINUS_ADDRESS}/${
               item.terminusPoolId - 3
             }`}
-            bgColor={qty > 0 ? undefined : "orange.1200"}
+            isExternal={true}
           >
-            List on opensea
+            View on opensea
           </RouteButton>
         )}
       </Flex>
