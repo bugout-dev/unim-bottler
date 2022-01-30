@@ -9,6 +9,7 @@ import {
   IconButton,
   Flex,
   Badge,
+  Text,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import useModals from "../core/hooks/useModals";
@@ -24,11 +25,22 @@ import {
 import router from "next/router";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 import Web3Context from "../core/providers/Web3Provider/context";
+import useBottler from "../core/hooks/useBottler";
+import { UNIM_ADDRESS, BOTTLER_ADDRESS } from "../AppDefintions";
+import { chains } from "../core/providers/Web3Provider";
 
 const LandingNavbar = () => {
   const ui = useContext(UIContext);
   const { toggleModal } = useModals();
   const web3Provider = useContext(Web3Context);
+  const bottler = useBottler({
+    MilkAddress: UNIM_ADDRESS,
+    BottlerAddress: BOTTLER_ADDRESS,
+    targetChain:
+      process.env.NODE_ENV === "development"
+        ? chains.matic_mumbai
+        : chains.matic,
+  });
   return (
     <>
       {ui.isMobileView && (
@@ -89,9 +101,34 @@ const LandingNavbar = () => {
             )}
             {web3Provider.buttonText ===
               web3Provider.WALLET_STATES.CONNECTED && (
-              <Badge colorScheme={"orange"} variant={"subtle"} fontSize={"lg"}>
-                Connected:{` ${web3Provider.account}`}
-              </Badge>
+              <Flex>
+                <Badge
+                  colorScheme={"pink"}
+                  variant={"solid"}
+                  fontSize={"md"}
+                  borderRadius={"md"}
+                  mr={2}
+                >
+                  <Flex>
+                    <Image
+                      ml={2}
+                      h="22px"
+                      src="https://darkforest.cryptounicorns.fun/static/media/icon_milk.6fc3d44e.png"
+                    />
+                    <Text mx={2} display={"inline-block"}>
+                      {bottler.erc20Balance}
+                    </Text>
+                  </Flex>
+                </Badge>
+                <Badge
+                  colorScheme={"green"}
+                  variant={"solid"}
+                  fontSize={"md"}
+                  borderRadius={"md"}
+                >
+                  Connected:{` ${web3Provider.account}`}
+                </Badge>
+              </Flex>
             )}
           </ButtonGroup>
           <ButtonGroup variant="link" colorScheme="orange" spacing={4} pr={16}>

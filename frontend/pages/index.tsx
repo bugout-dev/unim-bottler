@@ -1,5 +1,14 @@
 import React, { useContext } from "react";
-import { Stack, Heading, Center, Flex } from "@chakra-ui/react";
+import {
+  Stack,
+  Heading,
+  Center,
+  Flex,
+  Badge,
+  Image,
+  Text,
+  Spacer,
+} from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
 import { UNIM_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
 
@@ -24,22 +33,21 @@ const Homepage = () => {
     targetChain: targetChain,
   });
 
-  console.log("test", Number(bottler.erc20Balance) < BOTTLE_TYPES.small.volume);
   return (
     <>
-      <Center w="100%" bgColor="blue.900">
-        <Stack
+      <Center w="100%" bgColor="blue.1200">
+        <Flex
           w="100%"
-          maxW="1337px"
+          maxW="1800px"
           minH="100vh"
-          direction="column"
+          direction="row"
           placeContent="center"
           p={4}
-          spacing={8}
+          flexWrap={"wrap"}
         >
-          <Heading>Your account UNIM tokens: {bottler.erc20Balance} </Heading>
+          {/* <Heading>Your account UNIM tokens: {bottler.erc20Balance} </Heading> */}
           <Stack
-            maxW="1024px"
+            maxW="800px"
             px={4}
             bgColor={"purple.200"}
             h={ui.isMobileView ? "auto" : "600px"}
@@ -47,8 +55,9 @@ const Homepage = () => {
             placeSelf={"center"}
             borderRadius="lg"
             boxShadow="xl"
+            mx={2}
           >
-            <Heading>Fill your milk in to bottles</Heading>
+            <Heading>You bring the UNIM, we bring the bottles</Heading>
             <Flex
               direction={"row"}
               flexWrap={ui.isMobileView ? "wrap" : "nowrap"}
@@ -59,25 +68,44 @@ const Homepage = () => {
               <BottleCard
                 bottle={BOTTLE_TYPES.small}
                 isDisabled={
-                  Number(bottler.erc20Balance) < BOTTLE_TYPES.small.volume
+                  Number(bottler.erc20Balance) <
+                    bottler.bottleVolumes[BOTTLE_TYPES.small.poolId] ||
+                  Number(bottler.erc20Balance) === 0
                 }
+                volume={bottler.bottleVolumes[BOTTLE_TYPES.small.poolId]}
+                bottlesLeft={Number(
+                  bottler.bottlesLeftToMint[BOTTLE_TYPES.small.poolId]
+                )}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.medium}
                 isDisabled={
-                  Number(bottler.erc20Balance) < BOTTLE_TYPES.medium.volume
+                  Number(bottler.erc20Balance) <
+                    bottler.bottleVolumes[BOTTLE_TYPES.medium.poolId] ||
+                  Number(bottler.erc20Balance) === 0
                 }
+                volume={bottler.bottleVolumes[BOTTLE_TYPES.medium.poolId]}
+                bottlesLeft={Number(
+                  bottler.bottlesLeftToMint[BOTTLE_TYPES.medium.poolId]
+                )}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.large}
                 isDisabled={
-                  Number(bottler.erc20Balance) < BOTTLE_TYPES.large.volume
+                  Number(bottler.erc20Balance) <
+                    bottler.bottleVolumes[BOTTLE_TYPES.large.poolId] ||
+                  Number(bottler.erc20Balance) === 0
                 }
+                volume={bottler.bottleVolumes[BOTTLE_TYPES.large.poolId]}
+                bottlesLeft={Number(
+                  bottler.bottlesLeftToMint[BOTTLE_TYPES.large.poolId]
+                )}
               />
             </Flex>
           </Stack>
           <Stack
-            maxW="1024px"
+            mx={2}
+            maxW="800px"
             px={4}
             bgColor={"purple.200"}
             h={ui.isMobileView ? "inherit" : "600px"}
@@ -87,7 +115,34 @@ const Homepage = () => {
             boxShadow="xl"
             pb={ui.isMobileView ? "100px" : "inherit"}
           >
-            <Heading>My inventory</Heading>
+            <Stack direction={["column", "row", null]}>
+              <Heading fontWeight={900}>My inventory</Heading>
+              <Spacer />
+              <Badge
+                colorScheme={"pink"}
+                variant={"solid"}
+                fontSize={"md"}
+                borderRadius={"md"}
+                wordBreak={"break-word"}
+                whiteSpace={"normal"}
+                textAlign={"center"}
+                alignSelf={"center"}
+                // maxW="200px"
+                // ml={4}
+                // mt={2}
+              >
+                <Flex>
+                  <Image
+                    ml={2}
+                    h="22px"
+                    src="https://darkforest.cryptounicorns.fun/static/media/icon_milk.6fc3d44e.png"
+                  />
+                  <Text mx={2} display={"inline-block"}>
+                    {bottler.erc20Balance}
+                  </Text>
+                </Flex>
+              </Badge>
+            </Stack>
             <Stack direction={"column"} justifyContent={"space-evenly"}>
               <InventoryItem
                 item={BOTTLE_TYPES.small}
@@ -121,7 +176,7 @@ const Homepage = () => {
               />
             </Stack>
           </Stack>
-        </Stack>
+        </Flex>
       </Center>
       <Stack />
     </>

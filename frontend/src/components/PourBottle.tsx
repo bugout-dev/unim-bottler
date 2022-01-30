@@ -35,9 +35,17 @@ const PourBottle = (props: { bottle: BottleType }) => {
   React.useEffect(() => {
     const erc20Balance = Number(bottler.erc20Balance);
     setCanAfford(
-      numberOfBottles * props.bottle.volume <= erc20Balance ? true : false
+      numberOfBottles * bottler.bottleVolumes[props.bottle.poolId] <=
+        erc20Balance
+        ? true
+        : false
     );
-  }, [numberOfBottles, props.bottle, bottler.erc20Balance]);
+  }, [
+    numberOfBottles,
+    props.bottle,
+    bottler.erc20Balance,
+    bottler.bottleVolumes,
+  ]);
 
   React.useEffect(() => {
     if (
@@ -88,9 +96,13 @@ const PourBottle = (props: { bottle: BottleType }) => {
           </NumberInput>
         </Stack>
         <Text fontSize={"sm"}>
-          Each {props.bottle.name} bottle contains {props.bottle.volume} UNIML.
-          Performing this action will give you equivalent amount of UNIML... and
-          an empty bottle
+          Each {props.bottle.name} bottle contains{" "}
+          {bottler.bottleVolumes[props.bottle.poolId]} UNIML. Performing this
+          action will give you{" "}
+          {bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles} amount
+          of UNIML... and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
+          bottle
+          {numberOfBottles > 1 && `s`}
         </Text>
 
         <Button

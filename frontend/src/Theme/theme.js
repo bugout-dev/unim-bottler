@@ -58,9 +58,9 @@ const theme = extendTheme({
   },
 
   fonts: {
-    heading: '"Comic Neue", sans-serif',
-    body: '"Comic Neue", sans-serif',
-    mono: '"Comic Neue", monospace',
+    heading: '"Virgil", sans-serif',
+    body: '"Body Virgil", sans-serif',
+    mono: '"Virgil", monospace',
   },
   fontSizes: {
     xs: "0.625rem", //10px

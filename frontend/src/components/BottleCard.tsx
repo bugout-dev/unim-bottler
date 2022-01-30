@@ -7,9 +7,13 @@ import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 const BottleCard = ({
   bottle,
   isDisabled,
+  volume,
+  bottlesLeft,
 }: {
   bottle: BottleType;
   isDisabled: boolean;
+  volume: number;
+  bottlesLeft: number;
 }) => {
   const overlay = useContext(OverlayContext);
   const handleCardClick = (bottle: BottleType) => {
@@ -40,7 +44,7 @@ const BottleCard = ({
         position="relative"
         top="0"
         left="0"
-        h="360px"
+        h="420px"
         w="240px"
         backgroundColor={isDisabled ? "rgba(128,128,128,1)" : "inherit"}
       >
@@ -73,9 +77,12 @@ const BottleCard = ({
 
           <Stack direction={"row"} align={"center"}>
             <Text fontWeight={800} fontSize={"xl"}>
-              ({bottle.volume} UNIM)
+              ({volume} UNIM)
             </Text>
           </Stack>
+          <Text fontWeight={800} fontSize={"sm"} px={4}>
+            {bottlesLeft} presale bottles left)
+          </Text>
         </Stack>
         <chakra.span
           alignSelf={"center"}

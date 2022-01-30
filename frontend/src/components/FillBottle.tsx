@@ -20,13 +20,13 @@ import useBottler, { BottleType } from "../core/hooks/useBottler";
 import { chains } from "../core/providers/Web3Provider";
 import overlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
+import BN from "bn.js";
 
 const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
   const { toggleModal } = useContext(overlayContext);
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
-  const requiredMilk = props.bottle.volume * numberOfBottles;
   const web3Provider = useContext(Web3Context);
   const bottler = useBottler({
     MilkAddress: UNIM_ADDRESS,
@@ -36,6 +36,8 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
         ? chains.matic_mumbai
         : chains.matic,
   });
+  const requiredMilk =
+    bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles;
   const [valueToApprove, setValueToApprove] = React.useState<number>(0);
 
   let fillMethod: web3MethodCall = props.refill
@@ -45,9 +47,17 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
   React.useEffect(() => {
     const erc20Balance = Number(bottler.erc20Balance);
     setCanAfford(
-      numberOfBottles * props.bottle.volume <= erc20Balance ? true : false
+      numberOfBottles * bottler.bottleVolumes[props.bottle.poolId] <=
+        erc20Balance
+        ? true
+        : false
     );
-  }, [numberOfBottles, props.bottle, bottler.erc20Balance]);
+  }, [
+    numberOfBottles,
+    props.bottle,
+    bottler.erc20Balance,
+    bottler.bottleVolumes,
+  ]);
 
   React.useEffect(() => {
     const needsApproval =
@@ -72,6 +82,10 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
     }
   }, [fillMethod.status, toggleModal]);
 
+  var temp = new BN(numberOfBottles);
+
+  const weiToPay = temp.mul(bottler.fullBottlePricesBN[props.bottle.poolId]);
+
   return (
     <Center>
       <Stack>
@@ -80,7 +94,9 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
           borderRadius="md"
           h="280px"
           w="280px"
-          src={props.bottle.imageUrl}
+          src={
+            props.refill ? props.bottle.emptyImageURL : props.bottle.imageUrl
+          }
         />
         <Stack
           direction={"row"}
@@ -95,7 +111,9 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
             defaultValue={1}
             bgColor={"purple.500"}
             min={1}
-            max={1000001}
+            max={
+              props.refill ? bottler.emptyBottles[props.bottle.poolId] : 1000001
+            }
             w="123px"
             onChange={(valueAsString) => setNumber(Number(valueAsString))}
           >
@@ -110,10 +128,10 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
           </NumberInput>
         </Stack>
         <Text fontSize={"sm"}>
-          Each {props.bottle.name} bottle contains {props.bottle.volume} In
-          order to fill a bottle, bottler must have your approval to use{" "}
-          {requiredMilk} of your UNIM tokens. Currently you have approved{" "}
-          {bottler.allowance}.{" "}
+          Each {props.bottle.name} bottle contains{" "}
+          {bottler.bottleVolumes[props.bottle.poolId]} In order to fill a
+          bottle, bottler must have your approval to use {requiredMilk} of your
+          UNIM tokens. Currently you have approved {bottler.allowance}.{" "}
           {valueToApprove !== 0 && `We need ${valueToApprove}`}
         </Text>
         {valueToApprove !== 0 && (
@@ -149,9 +167,7 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
                 props.bottle.poolId,
                 web3Provider.web3.utils.toBN(numberOfBottles),
                 {
-                  value: props.refill
-                    ? 0
-                    : web3Provider.web3.utils.toBN(props.bottle.weiPrice),
+                  value: props.refill ? 0 : weiToPay,
                 }
               )
             }

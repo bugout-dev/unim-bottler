@@ -10,6 +10,7 @@ import {
   Web3Provider,
 } from "./core/providers";
 import { StripeProvider } from "./core/providers/StripeProvider";
+import Fonts from "./Theme/Fonts";
 
 const AppContext = (props) => {
   useEffect(() => {
@@ -24,6 +25,7 @@ const AppContext = (props) => {
     <UserProvider>
       <StripeProvider>
         <ChakraProvider theme={theme}>
+          <Fonts />
           <Web3Provider>
             <DataProvider>
               <UIProvider>

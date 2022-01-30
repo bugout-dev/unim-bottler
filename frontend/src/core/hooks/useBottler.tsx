@@ -4,15 +4,16 @@ import { useToast } from "./";
 import { web3MethodCall } from "../providers/Web3Provider/context";
 import useWeb3MethodCall from "./useWeb3MethodCall";
 import DataContext from "../providers/DataProvider/context";
+import BN from "bn.js";
 
 export interface BottleType {
-  volume: number;
   name: string;
   imageUrl: string;
+  emptyImageURL: string;
   // TODO(zomglings): Rename to poolIndex. It is too easy to confuse poolId as referring to the Terminus
   // pool ID.
   poolId: number;
-  weiPrice: string;
+  terminusPoolId: number;
 }
 export interface BottleTypes {
   small: BottleType;
@@ -22,28 +23,31 @@ export interface BottleTypes {
 
 export const BOTTLE_TYPES: BottleTypes = {
   small: {
-    volume: process.env.NODE_ENV !== "development" ? 500 : 250,
     name: "small",
+    emptyImageURL:
+      "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_empty_bottle.png",
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png",
     poolId: 0,
-    weiPrice: "100000000000000000",
+    terminusPoolId: 5,
   },
   medium: {
-    volume: process.env.NODE_ENV !== "development" ? 2500 : 5000,
     name: "medium",
+    emptyImageURL:
+      "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/medium_empty_bottle.png",
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/medium_um.png",
     poolId: 1,
-    weiPrice: "400000000000000000",
+    terminusPoolId: 6,
   },
   large: {
-    volume: process.env.NODE_ENV !== "development" ? 50000 : 50000,
     name: "large",
+    emptyImageURL:
+      "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/large_empty_bottle.png",
     imageUrl:
       "https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/large_um.png",
     poolId: 2,
-    weiPrice: "2400000000000000000",
+    terminusPoolId: 7,
   },
 };
 
@@ -56,6 +60,10 @@ export interface useBottlerReturns {
   emptyBottles: Array<number>;
   fullBottles: Array<number>;
   pourFullBottles: web3MethodCall;
+  bottleVolumes: Array<number>;
+  fullBottlesPrices: Array<number>;
+  fullBottlePricesBN: Array<BN>;
+  bottlesLeftToMint: Array<BN>;
 }
 
 export interface useBottlerArgumentsType {
@@ -79,10 +87,18 @@ const useBottler = ({
     fullBottles,
     contract,
     bottlerContract,
+    fullBottlesPrices,
+    bottleVolumes,
+    fullBottlePricesBN,
+    bottlesLeftToMint,
     setEmptyBottles,
     setErc20Balance,
     setAllowance,
     setFullBottles,
+    setFullBottlePrices,
+    setBottleVolumes,
+    setFullBottlePricesBN,
+    setBottlesLeftToMint,
   } = dataProvider;
 
   React.useEffect(() => {
@@ -127,6 +143,85 @@ const useBottler = ({
           const emptyBottlesNum = bottles.map((bottle) => Number(bottle));
           setEmptyBottles(emptyBottlesNum);
         });
+      bottlerContract.methods
+        .getFullBottlePrices()
+        .call()
+        .then((prices: Array<string>) => {
+          console.log("got bottle prices:", prices);
+          const fullBottlePricesMatic = prices.map((price) =>
+            Number(web3Provider.web3.utils.fromWei(price, "ether"))
+          );
+          console.log(
+            "got bottle prices fullBottlePricesMatic:",
+            fullBottlePricesMatic
+          );
+          setFullBottlePrices(fullBottlePricesMatic);
+          const fullBottlePriceBN = prices.map((price) =>
+            web3Provider.web3.utils.toBN(price)
+          );
+          setFullBottlePricesBN(fullBottlePriceBN);
+        });
+      let bottleVolumes: Array<string> = [];
+      bottlerContract.methods
+        .getVolumeByIndex(0)
+        .call()
+        .then((smallBottleVolume: string) => {
+          bottleVolumes[0] = smallBottleVolume;
+          bottlerContract.methods
+            .getVolumeByIndex(1)
+            .call()
+            .then((smallBottleVolume: string) => {
+              bottleVolumes[1] = smallBottleVolume;
+              bottlerContract.methods
+                .getVolumeByIndex(2)
+                .call()
+                .then((smallBottleVolume: string) => {
+                  bottleVolumes[2] = smallBottleVolume;
+                  const _bottleVolumes = bottleVolumes.map((volume) =>
+                    Number(web3Provider.web3.utils.fromWei(volume, "ether"))
+                  );
+                  console.log("_bottleVolumes", _bottleVolumes);
+                  setBottleVolumes(_bottleVolumes);
+                });
+            });
+        });
+
+      bottlerContract.methods
+        .getBottleCapacities()
+        .call()
+        .then((capacities: Array<string>) => {
+          const capacitiesBN = capacities.map((capacity) =>
+            web3Provider.web3.utils.toBN(capacity)
+          );
+          bottlerContract.methods
+            .getEmptyBottleSupplies()
+            .call()
+            .then((emptyBottlesMinted: Array<string>) => {
+              const emptyBottlesMintedBN = emptyBottlesMinted.map(
+                (emptyBottlesPoolMinted) =>
+                  web3Provider.web3.utils.toBN(emptyBottlesPoolMinted)
+              );
+              bottlerContract.methods
+                .getFullBottleSupplies()
+                .call()
+                .then((fullBottlesMinted: Array<string>) => {
+                  const fullBottlesMintedBN = fullBottlesMinted.map(
+                    (fullBottlesPoolMinted) =>
+                      web3Provider.web3.utils.toBN(fullBottlesPoolMinted)
+                  );
+
+                  const bottlesLeft = capacitiesBN.map(
+                    (capacityOfPool, poolIdx) => {
+                      var temp = new BN(capacityOfPool);
+                      temp = temp.sub(emptyBottlesMintedBN[poolIdx]);
+                      temp = temp.sub(fullBottlesMintedBN[poolIdx]);
+                      return temp;
+                    }
+                  );
+                  setBottlesLeftToMint(bottlesLeft);
+                });
+            });
+        });
     }
   }, [
     BottlerAddress,
@@ -140,6 +235,10 @@ const useBottler = ({
     web3Provider.account,
     web3Provider.web3.utils,
     web3Provider.chainId,
+    setBottleVolumes,
+    setFullBottlePrices,
+    setFullBottlePricesBN,
+    setBottlesLeftToMint,
   ]);
   const fillBottles = useWeb3MethodCall({
     name: "fillBottles",
@@ -199,6 +298,13 @@ const useBottler = ({
 
   const toast = useToast();
 
+  console.log(
+    "bottles left to mint: ",
+    bottlesLeftToMint.map((bottlesLeftToMintBN) =>
+      bottlesLeftToMintBN.toString()
+    )
+  );
+
   React.useEffect(() => {
     syncAccountState();
   }, [web3Provider.account, web3Provider.chainId, syncAccountState]);
@@ -212,6 +318,10 @@ const useBottler = ({
     fillEmptyBottles,
     approveSpendMilk,
     pourFullBottles,
+    fullBottlesPrices,
+    bottleVolumes,
+    fullBottlePricesBN,
+    bottlesLeftToMint,
   };
 };
 

@@ -11,8 +11,8 @@ export const APP_API_URL = process.env.NEXT_PUBLIC_APP_API_URL;
 */
 export const DEFAULT_METATAGS = {
   title: "Unicorn milk bottler shop",
-  description: "Wrap your UNIMLK erc20 in to NFTs!",
-  keywords: "web3, smart contracts, unimlk, nfts",
+  description: "Wrap your UNIM erc20 in to NFTs!",
+  keywords: "web3, smart contracts, unim, nfts",
   //TODO(@Peersky): setup correct url here
   url: "https://www.changeme.at.constants.js",
   image: `https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png`,

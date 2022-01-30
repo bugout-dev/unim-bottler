@@ -69,7 +69,7 @@ const SocialButton = ({ children, label, href }) => {
 
 const Footer = () => (
   <Box
-    bg={useColorModeValue("blue.900", "gray.900")}
+    bg={useColorModeValue("blue.1200", "gray.900")}
     color={useColorModeValue("gray.700", "gray.200")}
   >
     <Container as={Stack} maxW={"6xl"} py={10}>
@@ -92,11 +92,10 @@ const Footer = () => (
                 />
               </Link>
             </Box>
-            <Text>This is the way. Milky way.</Text>
+            <Text textColor={"gray.300"} fontWeight={"600"}>
+              This is the way. Milky way.
+            </Text>
           </Stack>
-          <Text fontSize={"sm"}>
-            © {moment().year()} {COPYRIGHT_NAME} All rights reserved
-          </Text>
           <Stack direction={"row"} spacing={6}>
             {SOCIAL_LINKS.map((social_link, idx) => {
               return (
@@ -136,6 +135,9 @@ const Footer = () => (
           );
         })}
       </SimpleGrid>
+      <Text fontSize={"sm"} textColor={"gray.300"} w="100%" textAlign={"end"}>
+        © {moment().year()} {COPYRIGHT_NAME} All rights reserved
+      </Text>
     </Container>
   </Box>
 );
