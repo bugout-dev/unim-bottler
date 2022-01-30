@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Box, Heading, Text, Stack, chakra, Image, Flex } from "@chakra-ui/react";
+import { Box, Heading, Text, Stack, chakra, Image } from "@chakra-ui/react";
 import { BottleType } from "../core/hooks/useBottler";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
