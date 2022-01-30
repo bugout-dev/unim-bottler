@@ -10,11 +10,11 @@ export const APP_API_URL = process.env.NEXT_PUBLIC_APP_API_URL;
   image: URL of image to display on page preview in search engines and link shares
 */
 export const DEFAULT_METATAGS = {
-  title: "Unicorn milk bottler shop",
-  description: "Wrap your UNIM erc20 in to NFTs!",
+  title: "UNIM bottler",
+  description: "Sell your UNIM on OpenSea",
   keywords: "web3, smart contracts, unim, nfts",
   //TODO(@Peersky): setup correct url here
-  url: "https://www.changeme.at.constants.js",
+  url: "https://bottler.cryptounicorns.exchange",
   image: `https://s3.amazonaws.com/static.simiotics.com/unicorn_bazaar/small_um.png`,
 };
 
