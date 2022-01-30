@@ -83,20 +83,19 @@ const InventoryItem = ({
         )}
         {isFull && (
           <RouteButton
-            isDisabled={qty > 0 ? false : true}
+            isDisabled={false}
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
             href={`http://opensea.io/assets/matic/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
             isExternal={true}
-            bgColor={qty > 0 ? undefined : "orange.1200"}
           >
-            List on opensea
+            View on opensea
           </RouteButton>
         )}
         {!isFull && (
           <RouteButton
-            isDisabled={qty > 0 ? false : true}
+            isDisabled={false}
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
@@ -104,9 +103,8 @@ const InventoryItem = ({
               item.terminusPoolId - 3
             }`}
             isExternal={true}
-            bgColor={qty > 0 ? undefined : "orange.1200"}
           >
-            List on opensea
+            View on opensea
           </RouteButton>
         )}
       </Flex>

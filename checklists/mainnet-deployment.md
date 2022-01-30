@@ -176,6 +176,6 @@ bottler bottler set-terminus-pool-uri \
 
 ```
 
-- [ ] Test on mainnet
-- [ ] verify contracts
+- [x] Test on mainnet
+- [x] verify contracts
 - [ ] MARKETING
