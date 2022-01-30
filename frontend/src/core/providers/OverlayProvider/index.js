@@ -191,9 +191,9 @@ const OverlayProvider = ({ children }) => {
             {modal.type === MODAL_TYPES.SIGNUP && "Create an account"}
             {modal.type === MODAL_TYPES.UPLOAD_ABI && "Assign ABI"}
             {modal.type === MODAL_TYPES.FILL_BOTTLE &&
-              `Fill ${modal.props.bottle.name} bottles with UNIML`}
+              `Fill ${modal.props.bottle.name} bottles with UNIM`}
             {modal.type === MODAL_TYPES.POUR_BOTTLE &&
-              `Open ${modal.props.bottle.name} bottles with UNIML`}
+              `Open ${modal.props.bottle.name} bottles with UNIM`}
           </ModalHeader>
           {modal.type !== MODAL_TYPES.FILL_BOTTLE &&
             modal.type !== MODAL_TYPES.POUR_BOTTLE && <Divider />}

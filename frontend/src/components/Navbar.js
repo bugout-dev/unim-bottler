@@ -10,12 +10,14 @@ const Navbar = () => {
 
   return (
     <Flex
-      boxShadow={["sm", "md"]}
+      boxShadow={["md", "lg"]}
+      zIndex={1}
+      shadow={"outline"}
       alignItems="center"
       id="Navbar"
       minH="3rem"
       maxH="3rem"
-      bgColor="blue.1200"
+      bgColor="yellow.500"
       direction="row"
       w="100%"
       overflow="hidden"

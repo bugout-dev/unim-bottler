@@ -38,11 +38,19 @@ import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import moment from "moment";
 import Web3Context from "../core/providers/Web3Provider/context";
+import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
+import { targetChain } from "../core/providers/Web3Provider";
+import useBottler from "../core/hooks/useBottler";
 
 const Sidebar = () => {
   const ui = useContext(UIContext);
   const web3Provider = useContext(Web3Context);
   const overlay = useContext(OverlayContext);
+  const bottler = useBottler({
+    MilkAddress: UNIM_ADDRESS,
+    BottlerAddress: BOTTLER_ADDRESS,
+    targetChain: targetChain,
+  });
   return (
     <ProSidebar
       width="240px"
@@ -168,6 +176,28 @@ const Sidebar = () => {
                         wordBreak={"break-word"}
                         whiteSpace={"normal"}
                       >{` ${web3Provider.account}`}</Badge>
+                      <Badge
+                        colorScheme={"pink"}
+                        variant={"solid"}
+                        fontSize={"md"}
+                        borderRadius={"md"}
+                        wordBreak={"break-word"}
+                        whiteSpace={"normal"}
+                        maxW="200px"
+                        ml={4}
+                        mt={2}
+                      >
+                        <Flex>
+                          <Image
+                            ml={2}
+                            h="22px"
+                            src="https://darkforest.cryptounicorns.fun/static/media/icon_milk.6fc3d44e.png"
+                          />
+                          <Text mx={2} display={"inline-block"}>
+                            {bottler.erc20Balance}
+                          </Text>
+                        </Flex>
+                      </Badge>
                     </Flex>
                   )}
                 </ButtonGroup>

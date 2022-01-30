@@ -5,6 +5,7 @@ import OverlayContext from "../core/providers/OverlayProvider/context";
 import UIcontext from "../core/providers/UIProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 import RouteButton from "./RouteButton";
+import { TERMINUS_ADDRESS } from "../AppDefintions";
 const InventoryItem = ({
   item,
   isFull,
@@ -38,7 +39,7 @@ const InventoryItem = ({
 
   return (
     <Stack
-      bgColor="orange.900"
+      bgColor="#ca6510"
       w="100%"
       px="22px"
       borderRadius={"xl"}
@@ -56,9 +57,10 @@ const InventoryItem = ({
       <Flex flexWrap={"wrap"}>
         {!isFull && (
           <Button
-            colorScheme="blue"
             size="sm"
+            isDisabled={qty > 0 ? true : false}
             variant={"solid"}
+            colorScheme="purple"
             onClick={() => {
               handleRefillClick({ item });
             }}
@@ -66,10 +68,11 @@ const InventoryItem = ({
             Refill
           </Button>
         )}
-        {qty > 0 && isFull && (
+        {isFull && (
           <Button
-            colorScheme="blue"
+            colorScheme="purple"
             size="sm"
+            isDisabled={qty > 0 ? true : false}
             variant={"solid"}
             onClick={() => {
               handlePourClick({ item, qty });
@@ -78,13 +81,14 @@ const InventoryItem = ({
             Open
           </Button>
         )}
-        {(!isFull || qty > 0) && (
+        {true && (
           <RouteButton
             isDisabled={qty > 0 ? false : true}
             size="sm"
             variant="solid"
-            colorScheme="purple"
-            href="http://opensea.io"
+            colorScheme={qty > 0 ? "blue" : "purple"}
+            href={`http://opensea.io/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
+            bgColor={qty > 0 ? undefined : "orange.1200"}
           >
             List on opensea
           </RouteButton>
