@@ -5,9 +5,9 @@ pragma solidity ^0.8.9;
 library LibBottler {
     bytes32 constant BOTTLER_STORAGE_POSITION =
         keccak256("moonstreamdao.eth.storage.bottler");
-    uint256 constant SMALL_BOTTLE_UNIM_VOLUME = 500 * (10**18);
-    uint256 constant MEDIUM_BOTTLE_UNIM_VOLUME = 5000 * (10**18);
-    uint256 constant LARGE_BOTTLE_UNIM_VOLUME = 50000 * (10**18);
+    uint256 constant SMALL_BOTTLE_UNIM_VOLUME = 250 * (10**18);
+    uint256 constant MEDIUM_BOTTLE_UNIM_VOLUME = 2500 * (10**18);
+    uint256 constant LARGE_BOTTLE_UNIM_VOLUME = 25000 * (10**18);
 
     struct BottlerStorage {
         address controller;
