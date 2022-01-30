@@ -9,11 +9,13 @@ const BottleCard = ({
   isDisabled,
   volume,
   bottlesLeft,
+  fullBottlePrice,
 }: {
   bottle: BottleType;
   isDisabled: boolean;
   volume: number;
   bottlesLeft: number;
+  fullBottlePrice: number;
 }) => {
   const overlay = useContext(OverlayContext);
   const handleCardClick = (bottle: BottleType) => {
@@ -44,7 +46,7 @@ const BottleCard = ({
         position="relative"
         top="0"
         left="0"
-        h="420px"
+        h="460px"
         w="240px"
         backgroundColor={isDisabled ? "rgba(128,128,128,1)" : "inherit"}
       >
@@ -77,9 +79,16 @@ const BottleCard = ({
 
           <Stack direction={"row"} align={"center"}>
             <Text fontWeight={800} fontSize={"xl"}>
-              ({volume} UNIM)
+              {volume} UNIM
             </Text>
           </Stack>
+
+          <Stack direction={"row"} align={"center"}>
+            <Text fontWeight={800} fontSize={"xl"}>
+              {fullBottlePrice} MATIC
+            </Text>
+          </Stack>
+
           <Text fontWeight={800} fontSize={"sm"} px={4}>
             {bottlesLeft} presale bottles left
           </Text>

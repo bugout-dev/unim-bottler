@@ -87,7 +87,8 @@ const InventoryItem = ({
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
-            href={`http://opensea.io/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
+            href={`http://opensea.io/assets/matic/${TERMINUS_ADDRESS}/${item.terminusPoolId}`}
+            isExternal={true}
             bgColor={qty > 0 ? undefined : "orange.1200"}
           >
             List on opensea
@@ -99,9 +100,10 @@ const InventoryItem = ({
             size="sm"
             variant="solid"
             colorScheme={qty > 0 ? "blue" : "purple"}
-            href={`http://opensea.io/${TERMINUS_ADDRESS}/${
+            href={`http://opensea.io/assets/matic/${TERMINUS_ADDRESS}/${
               item.terminusPoolId - 3
             }`}
+            isExternal={true}
             bgColor={qty > 0 ? undefined : "orange.1200"}
           >
             List on opensea

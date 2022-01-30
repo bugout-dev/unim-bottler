@@ -129,8 +129,8 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
         </Stack>
         <Text fontSize={"sm"}>
           Each {props.bottle.name} bottle contains{" "}
-          {bottler.bottleVolumes[props.bottle.poolId]} In order to fill a
-          bottle, bottler must have your approval to use {requiredMilk} of your
+          {bottler.bottleVolumes[props.bottle.poolId]}. In order to fill a
+          bottle, the bottler must have your approval to use {requiredMilk} of your
           UNIM tokens. Currently you have approved {bottler.allowance}.{" "}
           {valueToApprove !== 0 && `We need ${valueToApprove}`}
         </Text>

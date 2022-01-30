@@ -76,6 +76,7 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.small.poolId]
                 )}
+                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.small.poolId])}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.medium}
@@ -88,6 +89,7 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.medium.poolId]
                 )}
+                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.medium.poolId])}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.large}
@@ -100,6 +102,7 @@ const Homepage = () => {
                 bottlesLeft={Number(
                   bottler.bottlesLeftToMint[BOTTLE_TYPES.large.poolId]
                 )}
+                fullBottlePrice={Number(bottler.fullBottlesPrices[BOTTLE_TYPES.large.poolId])}
               />
             </Flex>
           </Stack>

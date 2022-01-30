@@ -100,9 +100,9 @@ const PourBottle = (props: { bottle: BottleType }) => {
           {bottler.bottleVolumes[props.bottle.poolId]} UNIML. Performing this
           action will give you{" "}
           {bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles} amount
-          of UNIML... and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
+          of UNIML, and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
           bottle
-          {numberOfBottles > 1 && `s`}
+          {numberOfBottles > 1 && `s`}.
         </Text>
 
         <Button
