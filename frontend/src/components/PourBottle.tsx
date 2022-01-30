@@ -22,7 +22,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
   console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
-  const [canAfford, setCanAfford] = React.useState<boolean>(true);
   const bottler = useBottler({
     MilkAddress: UNIM_ADDRESS,
     BottlerAddress: BOTTLER_ADDRESS,
@@ -31,21 +30,6 @@ const PourBottle = (props: { bottle: BottleType }) => {
         ? chains.matic_mumbai
         : chains.matic,
   });
-
-  React.useEffect(() => {
-    const erc20Balance = Number(bottler.erc20Balance);
-    setCanAfford(
-      numberOfBottles * bottler.bottleVolumes[props.bottle.poolId] <=
-        erc20Balance
-        ? true
-        : false
-    );
-  }, [
-    numberOfBottles,
-    props.bottle,
-    bottler.erc20Balance,
-    bottler.bottleVolumes,
-  ]);
 
   React.useEffect(() => {
     if (
@@ -107,7 +91,7 @@ const PourBottle = (props: { bottle: BottleType }) => {
 
         <Button
           isLoading={bottler.pourFullBottles.status === txStatus.LOADING}
-          isDisabled={!canAfford}
+          isDisabled={!numberOfBottles}
           placeSelf={"center"}
           colorScheme="green"
           variant="solid"
