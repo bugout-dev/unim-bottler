@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   Spacer,
+  Spinner,
 } from "@chakra-ui/react";
 import { DEFAULT_METATAGS } from "../src/core/constants";
 import { UNIM_ADDRESS, BOTTLER_ADDRESS } from "../src/AppDefintions";
@@ -32,6 +33,29 @@ const Homepage = () => {
     BottlerAddress: BOTTLER_ADDRESS,
     targetChain: targetChain,
   });
+
+  const isCardDisabled = (bottlePoolId: number): boolean => {
+    if (bottler.bottleVolumesCache.isLoading) return true;
+    console.debug("pass: 1", bottler.bottleVolumesCache.data);
+    if (!bottler.bottleVolumesCache.data) return true;
+    console.debug("pass: 2");
+    if (bottler.balanceCache.isLoading) return true;
+    console.debug("pass: 3");
+    if (!bottler.balanceCache.data) return true;
+    console.debug("pass: 4");
+    if (!bottler.bottleVolumesCache.data[bottlePoolId]) return true;
+    console.debug("pass: 5");
+    if (
+      Number(bottler.balanceCache.data) <
+      bottler.bottleVolumesCache.data[bottlePoolId].matic
+    )
+      return true;
+    console.debug("pass: 6");
+    if (Number(bottler.balanceCache.data) === 0) return true;
+    else return false;
+  };
+
+  console.debug("bottler.bottlesLeftCache.data", bottler.bottlesLeftCache.data);
 
   return (
     <>
@@ -67,48 +91,15 @@ const Homepage = () => {
             >
               <BottleCard
                 bottle={BOTTLE_TYPES.small}
-                isDisabled={
-                  Number(bottler.erc20Balance) <
-                    bottler.bottleVolumes[BOTTLE_TYPES.small.poolId] ||
-                  Number(bottler.erc20Balance) === 0
-                }
-                volume={bottler.bottleVolumes[BOTTLE_TYPES.small.poolId]}
-                bottlesLeft={Number(
-                  bottler.bottlesLeftToMint[BOTTLE_TYPES.small.poolId]
-                )}
-                fullBottlePrice={Number(
-                  bottler.fullBottlesPrices[BOTTLE_TYPES.small.poolId]
-                )}
+                isDisabled={isCardDisabled(BOTTLE_TYPES.small.poolId)}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.medium}
-                isDisabled={
-                  Number(bottler.erc20Balance) <
-                    bottler.bottleVolumes[BOTTLE_TYPES.medium.poolId] ||
-                  Number(bottler.erc20Balance) === 0
-                }
-                volume={bottler.bottleVolumes[BOTTLE_TYPES.medium.poolId]}
-                bottlesLeft={Number(
-                  bottler.bottlesLeftToMint[BOTTLE_TYPES.medium.poolId]
-                )}
-                fullBottlePrice={Number(
-                  bottler.fullBottlesPrices[BOTTLE_TYPES.medium.poolId]
-                )}
+                isDisabled={isCardDisabled(BOTTLE_TYPES.medium.poolId)}
               />
               <BottleCard
                 bottle={BOTTLE_TYPES.large}
-                isDisabled={
-                  Number(bottler.erc20Balance) <
-                    bottler.bottleVolumes[BOTTLE_TYPES.large.poolId] ||
-                  Number(bottler.erc20Balance) === 0
-                }
-                volume={bottler.bottleVolumes[BOTTLE_TYPES.large.poolId]}
-                bottlesLeft={Number(
-                  bottler.bottlesLeftToMint[BOTTLE_TYPES.large.poolId]
-                )}
-                fullBottlePrice={Number(
-                  bottler.fullBottlesPrices[BOTTLE_TYPES.large.poolId]
-                )}
+                isDisabled={isCardDisabled(BOTTLE_TYPES.large.poolId)}
               />
             </Flex>
           </Stack>
@@ -147,7 +138,11 @@ const Homepage = () => {
                     src="https://darkforest.cryptounicorns.fun/static/media/icon_milk.6fc3d44e.png"
                   />
                   <Text mx={2} display={"inline-block"}>
-                    {bottler.erc20Balance}
+                    {bottler.balanceCache.isLoading ? (
+                      <Spinner />
+                    ) : (
+                      bottler.balanceCache.data
+                    )}
                   </Text>
                 </Flex>
               </Badge>
@@ -156,32 +151,56 @@ const Homepage = () => {
               <InventoryItem
                 item={BOTTLE_TYPES.small}
                 isFull={true}
-                qty={bottler.fullBottles[0]}
+                qty={
+                  bottler.fullBottlesCache.data
+                    ? bottler.fullBottlesCache.data[0]
+                    : 0
+                }
               />
               <InventoryItem
                 item={BOTTLE_TYPES.medium}
                 isFull={true}
-                qty={bottler.fullBottles[1]}
+                qty={
+                  bottler.fullBottlesCache.data
+                    ? bottler.fullBottlesCache.data[1]
+                    : 0
+                }
               />
               <InventoryItem
                 item={BOTTLE_TYPES.large}
                 isFull={true}
-                qty={bottler.fullBottles[2]}
+                qty={
+                  bottler.fullBottlesCache.data
+                    ? bottler.fullBottlesCache.data[2]
+                    : 0
+                }
               />
               <InventoryItem
                 item={BOTTLE_TYPES.small}
                 isFull={false}
-                qty={bottler.emptyBottles[0]}
+                qty={
+                  bottler.emptyBottlesCache.data
+                    ? bottler.emptyBottlesCache.data[0]
+                    : 0
+                }
               />
               <InventoryItem
                 item={BOTTLE_TYPES.medium}
                 isFull={false}
-                qty={bottler.emptyBottles[1]}
+                qty={
+                  bottler.emptyBottlesCache.data
+                    ? bottler.emptyBottlesCache.data[1]
+                    : 0
+                }
               />
               <InventoryItem
                 item={BOTTLE_TYPES.large}
                 isFull={false}
-                qty={bottler.emptyBottles[2]}
+                qty={
+                  bottler.emptyBottlesCache.data
+                    ? bottler.emptyBottlesCache.data[1]
+                    : 0
+                }
               />
             </Stack>
           </Stack>

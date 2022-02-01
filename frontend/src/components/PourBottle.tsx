@@ -20,7 +20,6 @@ import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
 
 const PourBottle = (props: { bottle: BottleType }) => {
   const { toggleModal } = useContext(overlayContext);
-  console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const bottler = useBottler({
     MilkAddress: UNIM_ADDRESS,

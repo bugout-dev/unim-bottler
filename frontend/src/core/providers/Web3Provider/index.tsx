@@ -44,35 +44,24 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
 
   const setWeb3ProviderAsWindowEthereum = async () => {
     let wasSetupSuccess = false;
-    console.log("setWeb3ProviderAsWindowEthereum");
     await window.ethereum
       .request({ method: "eth_requestAccounts" })
       .then(() => {
-        console.log("setting up provider to window.ethereum");
         web3.setProvider(window.ethereum);
         wasSetupSuccess = true;
       });
-
-    // if (wasSetupSuccess) {
-    //   console.log("testing if web3 is using provider without errors");
-    //   await web3.eth.net.isListening().then(
-    //     (isListening) => (wasSetupSuccess = isListening),
-    //     () => (wasSetupSuccess = false)
-    //   );
-    // }
     return wasSetupSuccess;
   };
 
   const onConnectWalletClick = () => {
     if (window.ethereum) {
-      console.log(
-        "onConnectWalletClick, window.ethereum found -> connecting wallet"
-      );
+      console.log("wallet provider detected -> connecting wallet");
       setWeb3ProviderAsWindowEthereum().then((result) => {
-        if (result)
-          console.log("setup was successfull, now is legit to call web3.eth");
+        if (result) console.log("wallet setup was successfull");
         else
-          console.log("setup failed, should go in fallback mode immediately");
+          console.warn(
+            "wallet setup failed, should go in fallback mode immediately"
+          );
         setButtonText(result ? WALLET_STATES.CONNECTED : WALLET_STATES.CONNECT);
       });
     }
@@ -126,21 +115,18 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
       if (chainId) {
         if (chainId === targetChain.chainId) {
           //we are on matic
-          console.log("we are on matic, good! ");
+          console.log("chain id is correct");
         } else {
           //we are not on matic
-          console.log("we are not on matic - request to change", chainId);
+          console.log("requesting to change chain Id", chainId);
           changeChain();
         }
-        // console.log('getting chain id')
-        // web3?.eth.getChainId().then(id => setChainId(id))
       }
     }
   }, [chainId, web3.currentProvider, web3?.eth]);
 
   React.useLayoutEffect(() => {
     if (chainId === targetChain.chainId && web3.currentProvider) {
-      console.log("web3 is getting users account[0]");
       web3.eth.getAccounts().then((accounts) => setAccount(accounts[0]));
     }
   }, [chainId, web3.currentProvider, web3?.eth]);
@@ -148,52 +134,20 @@ const Web3Provider = ({ children }: { children: JSX.Element }) => {
   window?.ethereum?.on("chainChanged", () => window.location.reload());
 
   React.useLayoutEffect(() => {
-    console.log("updating wallet button status");
-
     if (web3.currentProvider && chainId) {
       if (chainId === targetChain.chainId) {
-        console.log("wallet connected");
         setButtonText(WALLET_STATES.CONNECTED);
       } else {
-        console.log("wallet wrong chain");
         setButtonText(WALLET_STATES.WRONG_CHAIN);
       }
     } else {
       if (!window.ethereum) {
-        console.log("wallet onboard");
         setButtonText(WALLET_STATES.ONBOARD);
       } else {
-        console.log("wallet connect");
         setButtonText(WALLET_STATES.CONNECT);
       }
     }
-
-    // if (!chainId) {
-    //   if (!web3.currentProvider) {
-    //     if (!window.ethereum) {
-    //       console.log("wallet onboard");
-    //       setButtonText(WALLET_STATES.ONBOARD);
-    //     } else {
-    //       console.log("wallet connect");
-    //       setButtonText(WALLET_STATES.CONNECT);
-    //     }
-    //   } else {
-    //     if (chainId === targetChain.chainId) {
-    //       console.log("wallet connected");
-    //       setButtonText(WALLET_STATES.CONNECTED);
-    //     } else {
-    //       console.log("wallet wrong chain");
-    //       setButtonText(WALLET_STATES.WRONG_CHAIN);
-    //     }
-    //   }
-    // } else {
-    //   setButtonText(WALLET_STATES.CONNECT);
-    // }
   }, [web3.currentProvider, chainId]);
-
-  // React.useEffect(())
-
-  console.log("returning from web3provider. Account:", web3.currentProvider);
 
   return (
     <Web3Context.Provider
