@@ -56,7 +56,7 @@ export default class MyDocument extends Document {
                 dataLayer.push(arguments);
               }
               gtag("js", new Date());
-              gtag("config", "G-MNVHX36LZ1");`,
+              gtag("config", "${process.env.NEXT_PUBLIC_GTAG}");`,
             }}
           />
         </Head>
