@@ -24,6 +24,9 @@ const assets: any = {
   smallBottleImage: BOTTLE_TYPES.small.imageUrl,
   mediumBottleImage: BOTTLE_TYPES.medium.imageUrl,
   largeBottleImage: BOTTLE_TYPES.large.imageUrl,
+  smallEmptyBottleImage: BOTTLE_TYPES.small.emptyImageURL,
+  mediumEmptyBottleImage: BOTTLE_TYPES.medium.emptyImageURL,
+  largeEmptyBottleImage: BOTTLE_TYPES.large.emptyImageURL,
 };
 
 const Homepage = () => {
