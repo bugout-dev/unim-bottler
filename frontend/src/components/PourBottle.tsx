@@ -39,7 +39,9 @@ const PourBottle = (props: { bottle: BottleType }) => {
     }
   }, [bottler.pourFullBottles.status, toggleModal]);
 
-  const hasBottles = bottler.fullBottles[props.bottle.poolId];
+  const hasBottles = bottler.fullBottlesCache.data
+    ? bottler.fullBottlesCache.data[props.bottle.poolId]
+    : 0;
 
   return (
     <Center>
@@ -80,11 +82,16 @@ const PourBottle = (props: { bottle: BottleType }) => {
         </Stack>
         <Text fontSize={"sm"}>
           Each {props.bottle.name} bottle contains{" "}
-          {bottler.bottleVolumes[props.bottle.poolId]} UNIML. Performing this
-          action will give you{" "}
-          {bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles} amount
-          of UNIML, and {numberOfBottles === 1 ? `an` : numberOfBottles} empty
-          bottle
+          {bottler.bottleVolumesCache.data
+            ? bottler.bottleVolumesCache.data[props.bottle.poolId].matic
+            : "-"}{" "}
+          UNIML. Performing this action will give you{" "}
+          {bottler.bottleVolumesCache.data
+            ? bottler.bottleVolumesCache.data[props.bottle.poolId].matic *
+              numberOfBottles
+            : "N"}{" "}
+          amount of UNIML, and {numberOfBottles === 1 ? `an` : numberOfBottles}{" "}
+          empty bottle
           {numberOfBottles > 1 && `s`}.
         </Text>
 
