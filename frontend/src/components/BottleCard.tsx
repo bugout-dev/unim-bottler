@@ -1,30 +1,45 @@
 import React, { useContext } from "react";
-import { Box, Heading, Text, Stack, chakra, Image } from "@chakra-ui/react";
-import { BottleType } from "../core/hooks/useBottler";
+import {
+  Box,
+  Heading,
+  Text,
+  Stack,
+  chakra,
+  Image,
+  Spinner,
+} from "@chakra-ui/react";
+import useBottler, { BottleType } from "../core/hooks/useBottler";
 import OverlayContext from "../core/providers/OverlayProvider/context";
 import { MODAL_TYPES } from "../core/providers/OverlayProvider/constants";
+import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
+import { targetChain } from "../core/providers/Web3Provider";
 
 const BottleCard = ({
   bottle,
   isDisabled,
-  volume,
-  bottlesLeft,
-  fullBottlePrice,
-}: {
+}: // volume,
+// bottlesLeft,
+// fullBottlePrice,
+{
   bottle: BottleType;
   isDisabled: boolean;
-  volume: number;
-  bottlesLeft: number;
-  fullBottlePrice: number;
+  // volume: number;
+  // bottlesLeft: number;
+  // fullBottlePrice: number;
 }) => {
   const overlay = useContext(OverlayContext);
   const handleCardClick = (bottle: BottleType) => {
-    console.log(bottle.name);
     overlay.toggleModal({
       type: MODAL_TYPES.FILL_BOTTLE,
       props: { bottle: bottle, refill: false },
     });
   };
+
+  const bottler = useBottler({
+    MilkAddress: UNIM_ADDRESS,
+    BottlerAddress: BOTTLER_ADDRESS,
+    targetChain: targetChain,
+  });
 
   return (
     <Box
@@ -80,18 +95,39 @@ const BottleCard = ({
 
           <Stack direction={"row"} align={"center"}>
             <Text fontWeight={800} fontSize={"xl"}>
-              {volume} UNIM
+              {bottler.bottleVolumesCache.isLoading ? (
+                <Spinner size="xs" m={0} />
+              ) : bottler.bottleVolumesCache.data ? (
+                bottler.bottleVolumesCache.data[bottle.poolId].matic ?? 0
+              ) : (
+                0
+              )}{" "}
+              UNIM
             </Text>
           </Stack>
 
           <Stack direction={"row"} align={"center"}>
             <Text fontWeight={800} fontSize={"xl"}>
-              {fullBottlePrice} MATIC
+              {bottler.fullBottlesCache.isLoading ? (
+                <Spinner size="xs" m={0} />
+              ) : bottler.fullBottlesPricesCache.data ? (
+                bottler.fullBottlesPricesCache.data[bottle.poolId].matic ?? 0
+              ) : (
+                0
+              )}{" "}
+              MATIC
             </Text>
           </Stack>
 
           <Text fontWeight={800} fontSize={"sm"} px={4}>
-            {bottlesLeft} presale bottles left
+            {bottler.bottlesLeftCache.isLoading ? (
+              <Spinner size="xs" m="0" />
+            ) : bottler.bottlesLeftCache.data ? (
+              bottler.bottlesLeftCache.data[bottle.poolId] ?? 0
+            ) : (
+              0
+            )}{" "}
+            presale bottles left
           </Text>
         </Stack>
         <chakra.span

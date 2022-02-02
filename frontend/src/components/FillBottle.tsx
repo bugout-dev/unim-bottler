@@ -10,6 +10,7 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  Spinner,
 } from "@chakra-ui/react";
 import { BOTTLER_ADDRESS, UNIM_ADDRESS } from "../AppDefintions";
 import Web3Context, {
@@ -24,9 +25,10 @@ import BN from "bn.js";
 
 const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
   const { toggleModal } = useContext(overlayContext);
-  console.log("FillBottle", props);
   const [numberOfBottles, setNumber] = React.useState<number>(1);
   const [canAfford, setCanAfford] = React.useState<boolean>(true);
+  const [requiredMilk, setRequiredMilk] = React.useState<number>(0);
+
   const web3Provider = useContext(Web3Context);
   const bottler = useBottler({
     MilkAddress: UNIM_ADDRESS,
@@ -36,8 +38,7 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
         ? chains.matic_mumbai
         : chains.matic,
   });
-  const requiredMilk =
-    bottler.bottleVolumes[props.bottle.poolId] * numberOfBottles;
+
   const [valueToApprove, setValueToApprove] = React.useState<number>(0);
 
   let fillMethod: web3MethodCall = props.refill
@@ -45,27 +46,35 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
     : bottler.fillBottles;
 
   React.useEffect(() => {
-    const erc20Balance = Number(bottler.erc20Balance);
-    setCanAfford(
-      numberOfBottles * bottler.bottleVolumes[props.bottle.poolId] <=
-        erc20Balance
-        ? true
-        : false
-    );
+    // const erc20Balance = Number(bottler.erc20Balance);
+    if (
+      bottler.bottleVolumesCache.data &&
+      !bottler.bottleVolumesCache.isLoading &&
+      bottler.balanceCache.data &&
+      !bottler.balanceCache.isLoading
+    ) {
+      setCanAfford(
+        numberOfBottles *
+          bottler.bottleVolumesCache.data[props.bottle.poolId].matic <=
+          bottler.balanceCache.data
+          ? true
+          : false
+      );
+    }
   }, [
     numberOfBottles,
     props.bottle,
-    bottler.erc20Balance,
-    bottler.bottleVolumes,
+    bottler.bottleVolumesCache,
+    bottler.balanceCache,
   ]);
 
   React.useEffect(() => {
-    const needsApproval =
-      Number(bottler.allowance) >= requiredMilk ? false : true;
-    setValueToApprove(
-      needsApproval ? requiredMilk - Number(bottler.allowance) : 0
-    );
-  }, [bottler.allowance, numberOfBottles, requiredMilk]);
+    if (bottler.allowanceCache.data && !bottler.allowanceCache.isLoading) {
+      const currentAllowance = Number(bottler.allowanceCache.data);
+      const needsApproval = currentAllowance >= requiredMilk ? false : true;
+      setValueToApprove(needsApproval ? requiredMilk - currentAllowance : 0);
+    }
+  }, [bottler.allowanceCache, numberOfBottles, requiredMilk]);
 
   React.useEffect(() => {
     if (bottler.approveSpendMilk.status === txStatus.ERROR) {
@@ -82,9 +91,42 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
     }
   }, [fillMethod.status, toggleModal]);
 
-  var temp = new BN(numberOfBottles);
+  React.useEffect(() => {
+    if (bottler.bottleVolumesCache.data) {
+      setRequiredMilk(
+        bottler.bottleVolumesCache.data[props.bottle.poolId].matic *
+          numberOfBottles
+      );
+    }
+  }, [bottler.bottleVolumesCache.data, numberOfBottles, props.bottle.poolId]);
 
-  const weiToPay = temp.mul(bottler.fullBottlePricesBN[props.bottle.poolId]);
+  const handleSubmitClick = () => {
+    if (bottler.fullBottlesPricesCache.data) {
+      var temp = new BN(numberOfBottles);
+      const weiToPay = temp.mul(
+        bottler.fullBottlesPricesCache.data[props.bottle.poolId].bn
+      );
+      fillMethod.send(
+        props.bottle.poolId,
+        web3Provider.web3.utils.toBN(numberOfBottles),
+        {
+          value: props.refill ? 0 : weiToPay,
+        }
+      );
+    } else {
+      console.warn(
+        "Fill bottle click should not be accessible if no bottlePrices"
+      );
+    }
+  };
+
+  if (
+    !bottler.allowanceCache.data ||
+    bottler.allowanceCache.isLoading ||
+    !bottler.bottleVolumesCache.data ||
+    !bottler.emptyBottlesCache.data
+  )
+    return <Spinner />;
 
   return (
     <Center>
@@ -112,7 +154,9 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
             bgColor={"purple.500"}
             min={1}
             max={
-              props.refill ? bottler.emptyBottles[props.bottle.poolId] : 1000001
+              props.refill
+                ? bottler.emptyBottlesCache.data[props.bottle.poolId]
+                : 1000001
             }
             w="123px"
             onChange={(valueAsString) => setNumber(Number(valueAsString))}
@@ -129,9 +173,10 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
         </Stack>
         <Text fontSize={"sm"}>
           Each {props.bottle.name} bottle contains{" "}
-          {bottler.bottleVolumes[props.bottle.poolId]}. In order to fill a
-          bottle, the bottler must have your approval to use {requiredMilk} of your
-          UNIM tokens. Currently you have approved {bottler.allowance}.{" "}
+          {bottler.bottleVolumesCache.data[props.bottle.poolId].matic}. In order
+          to fill a bottle, the bottler must have your approval to use{" "}
+          {requiredMilk} of your UNIM tokens. Currently you have approved{" "}
+          {bottler.allowanceCache.data}.{" "}
           {valueToApprove !== 0 && `We need ${valueToApprove}`}
         </Text>
         {valueToApprove !== 0 && (
@@ -162,15 +207,7 @@ const FillBottle = (props: { bottle: BottleType; refill: boolean }) => {
             placeSelf={"center"}
             colorScheme="green"
             variant="solid"
-            onClick={() =>
-              fillMethod.send(
-                props.bottle.poolId,
-                web3Provider.web3.utils.toBN(numberOfBottles),
-                {
-                  value: props.refill ? 0 : weiToPay,
-                }
-              )
-            }
+            onClick={() => handleSubmitClick()}
           >
             Submit
           </Button>

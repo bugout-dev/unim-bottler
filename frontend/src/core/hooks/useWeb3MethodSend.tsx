@@ -3,14 +3,7 @@ import { Contract } from "web3-eth-contract";
 import Web3Context, { txStatus } from "../providers/Web3Provider/context";
 import { useContext } from "react";
 
-export interface UseWeb3MethodReturns {
-  data: any;
-  status: txStatus;
-  send: (...args: any[]) => void;
-  call: (...args: any[]) => any;
-}
-
-export interface UseWeb3Method {
+export interface UseWeb3MethodSend {
   name: string;
   contract: Contract;
   targetChain: any;
@@ -18,15 +11,14 @@ export interface UseWeb3Method {
   onError?: (error?: any) => void;
 }
 
-const useWeb3Method = ({
+const useWeb3MethodSend = ({
   name,
   contract,
   targetChain,
   onSuccess,
   onError,
-}: UseWeb3Method): UseWeb3MethodReturns => {
+}: UseWeb3MethodSend): { status: txStatus; send: (...args: any[]) => void } => {
   const [status, setStatus] = React.useState<txStatus>(txStatus.READY);
-  const [data, setData] = React.useState<any>(undefined);
   const web3Provider = useContext(Web3Context);
 
   const send = (...args: any) => {
@@ -63,26 +55,7 @@ const useWeb3Method = ({
     }
   };
 
-  const call = (...args: any) => {
-    if (
-      web3Provider.web3?.utils.isAddress(web3Provider.account) &&
-      web3Provider.chainId === targetChain.chainId
-    ) {
-      setStatus(txStatus.LOADING);
-      //todo bottle number enum here in args
-      contract.methods[`${name}`](...args).call(
-        { from: web3Provider.account },
-        (error: any, result: any) => {
-          setData(result);
-          if (error) {
-            onError && onError(error);
-          }
-        }
-      );
-    }
-  };
-
-  return { data, status, send, call };
+  return { status, send };
 };
 
-export default useWeb3Method;
+export default useWeb3MethodSend;

@@ -5,6 +5,8 @@ import { web3MethodCall } from "../providers/Web3Provider/context";
 import useWeb3MethodCall from "./useWeb3MethodCall";
 import DataContext from "../providers/DataProvider/context";
 import BN from "bn.js";
+import { useQuery, useQueryClient, UseQueryResult } from "react-query";
+import { queryCacheProps } from "./hookCommon";
 
 export interface BottleType {
   name: string;
@@ -52,18 +54,17 @@ export const BOTTLE_TYPES: BottleTypes = {
 };
 
 export interface useBottlerReturns {
-  erc20Balance: string;
-  allowance: string;
+  balanceCache: UseQueryResult<number, any>;
+  allowanceCache: UseQueryResult<string, any>;
   fillBottles: web3MethodCall;
   fillEmptyBottles: web3MethodCall;
   approveSpendMilk: web3MethodCall;
-  emptyBottles: Array<number>;
-  fullBottles: Array<number>;
+  fullBottlesCache: UseQueryResult<Array<number>, any>;
   pourFullBottles: web3MethodCall;
-  bottleVolumes: Array<number>;
-  fullBottlesPrices: Array<number>;
-  fullBottlePricesBN: Array<BN>;
-  bottlesLeftToMint: Array<BN>;
+  bottleVolumesCache: UseQueryResult<Array<{ matic: number; bn: BN }>, any>;
+  bottlesLeftCache: UseQueryResult<Array<number>, any>;
+  emptyBottlesCache: UseQueryResult<Array<number>, any>;
+  fullBottlesPricesCache: UseQueryResult<Array<{ matic: number; bn: BN }>, any>;
 }
 
 export interface useBottlerArgumentsType {
@@ -80,26 +81,7 @@ const useBottler = ({
   const web3Provider = useContext(Web3Context);
 
   const dataProvider = useContext(DataContext);
-  const {
-    allowance,
-    erc20Balance,
-    emptyBottles,
-    fullBottles,
-    contract,
-    bottlerContract,
-    fullBottlesPrices,
-    bottleVolumes,
-    fullBottlePricesBN,
-    bottlesLeftToMint,
-    setEmptyBottles,
-    setErc20Balance,
-    setAllowance,
-    setFullBottles,
-    setFullBottlePrices,
-    setBottleVolumes,
-    setFullBottlePricesBN,
-    setBottlesLeftToMint,
-  } = dataProvider;
+  const { contract, bottlerContract } = dataProvider;
 
   React.useEffect(() => {
     contract.options.address = MilkAddress;
@@ -109,137 +91,208 @@ const useBottler = ({
     bottlerContract.options.address = BottlerAddress;
   }, [BottlerAddress, bottlerContract.options]);
 
-  const syncAccountState = React.useCallback(() => {
-    if (
+  const _balanceOf = async (): Promise<number> => {
+    return contract.methods
+      .balanceOf(`${web3Provider.account}`)
+      .call()
+      .then((balance: any) =>
+        Number(web3Provider.web3.utils.fromWei(balance, "ether"))
+      );
+  };
+  const _allowance = async (): Promise<string> => {
+    return contract.methods
+      .balanceOf(`${web3Provider.account}`)
+      .call()
+      .then((balance: any) =>
+        web3Provider.web3.utils.fromWei(balance, "ether")
+      );
+  };
+  const _fullBottles = async (): Promise<Array<number>> => {
+    return bottlerContract.methods
+      .getFullBottleInventory(`${web3Provider.account}`)
+      .call()
+      .then((bottles: Array<string>) =>
+        bottles.map((bottle) => Number(bottle))
+      );
+  };
+  const _emptyBottles = async (): Promise<Array<number>> => {
+    return bottlerContract.methods
+      .getEmptyBottleInventory(`${web3Provider.account}`)
+      .call()
+      .then((bottles: Array<string>) =>
+        bottles.map((bottle) => Number(bottle))
+      );
+  };
+  const _fullBottlesPrices = async (): Promise<
+    Array<{ matic: number; bn: BN }>
+  > => {
+    return bottlerContract.methods
+      .getFullBottlePrices()
+      .call()
+      .then((prices: Array<string>) => {
+        const fullBottlePrices = prices.map((price) => {
+          return {
+            matic: Number(web3Provider.web3.utils.fromWei(price, "ether")),
+            bn: web3Provider.web3.utils.toBN(price),
+          };
+        });
+        return fullBottlePrices;
+      });
+  };
+  const _bottleVolumes = async (): Promise<
+    Array<{ matic: number; bn: BN }>
+  > => {
+    return bottlerContract.methods
+      .getVolumeByIndex(0)
+      .call()
+      .then((smallBottleVolume: string) => {
+        let bottleVolumes: Array<string> = [];
+        bottleVolumes[0] = smallBottleVolume;
+        return bottlerContract.methods
+          .getVolumeByIndex(1)
+          .call()
+          .then((mediumBottleVolume: string) => {
+            bottleVolumes[1] = mediumBottleVolume;
+            return bottlerContract.methods
+              .getVolumeByIndex(2)
+              .call()
+              .then((largeBottleVolume: string) => {
+                bottleVolumes[2] = largeBottleVolume;
+                const fullBottleVolumes = bottleVolumes.map(
+                  (volume: string) => {
+                    const maticValue = web3Provider.web3.utils.fromWei(
+                      `${volume}`,
+                      "ether"
+                    );
+                    return {
+                      matic: Number(maticValue),
+                      bn: web3Provider.web3.utils.toBN(volume),
+                    };
+                  }
+                );
+                return fullBottleVolumes;
+              });
+          });
+      });
+  };
+
+  const _bottlesLeft = async (): Promise<Array<number>> => {
+    return bottlerContract.methods
+      .getBottleCapacities()
+      .call()
+      .then((capacities: Array<string>) => {
+        const capacitiesBN = capacities.map((capacity) =>
+          web3Provider.web3.utils.toBN(capacity)
+        );
+        return bottlerContract.methods
+          .getEmptyBottleSupplies()
+          .call()
+          .then((emptyBottlesMinted: Array<string>) => {
+            const emptyBottlesMintedBN = emptyBottlesMinted.map(
+              (emptyBottlesPoolMinted) =>
+                web3Provider.web3.utils.toBN(emptyBottlesPoolMinted)
+            );
+            return bottlerContract.methods
+              .getFullBottleSupplies()
+              .call()
+              .then((fullBottlesMinted: Array<string>) => {
+                const fullBottlesMintedBN = fullBottlesMinted.map(
+                  (fullBottlesPoolMinted) =>
+                    web3Provider.web3.utils.toBN(fullBottlesPoolMinted)
+                );
+
+                const bottlesCapacitiesLeft = capacitiesBN.map(
+                  (capacityOfPool, poolIdx) => {
+                    var temp = new BN(capacityOfPool);
+                    temp = temp.sub(emptyBottlesMintedBN[poolIdx]);
+                    temp = temp.sub(fullBottlesMintedBN[poolIdx]);
+                    return temp;
+                  }
+                );
+                const num = bottlesCapacitiesLeft.map((bottlesLeft) =>
+                  Number(bottlesLeft.toString())
+                );
+                return num;
+              });
+          });
+      });
+  };
+
+  const balanceCache = useQuery(["web3", "balanceOf"], () => _balanceOf(), {
+    ...queryCacheProps,
+    enabled:
       web3Provider.web3?.utils.isAddress(web3Provider.account) &&
-      web3Provider.chainId === targetChain.chainId
-    ) {
-      console.log("web3Provider.account", web3Provider.account);
-      contract.methods
-        .balanceOf(`${web3Provider.account}`)
-        .call()
-        .then((balance: any) =>
-          setErc20Balance(web3Provider.web3.utils.fromWei(balance, "ether"))
-        );
-      contract.methods
-        .allowance(`${web3Provider.account}`, `${BottlerAddress}`)
-        .call()
-        .then((allowance: any) =>
-          setAllowance(web3Provider.web3.utils.fromWei(allowance, "ether"))
-        );
-      bottlerContract.methods
-        .getFullBottleInventory(`${web3Provider.account}`)
-        .call()
-        .then((bottles: Array<string>) => {
-          console.log("got full bottles:", bottles);
-          const fullBottlesNum = bottles.map((bottle) => Number(bottle));
-          setFullBottles(fullBottlesNum);
-        });
-      bottlerContract.methods
-        .getEmptyBottleInventory(`${web3Provider.account}`)
-        .call()
-        .then((bottles: Array<string>) => {
-          console.log("got empty bottles:", bottles);
-          const emptyBottlesNum = bottles.map((bottle) => Number(bottle));
-          setEmptyBottles(emptyBottlesNum);
-        });
-      bottlerContract.methods
-        .getFullBottlePrices()
-        .call()
-        .then((prices: Array<string>) => {
-          console.log("got bottle prices:", prices);
-          const fullBottlePricesMatic = prices.map((price) =>
-            Number(web3Provider.web3.utils.fromWei(price, "ether"))
-          );
-          console.log(
-            "got bottle prices fullBottlePricesMatic:",
-            fullBottlePricesMatic
-          );
-          setFullBottlePrices(fullBottlePricesMatic);
-          const fullBottlePriceBN = prices.map((price) =>
-            web3Provider.web3.utils.toBN(price)
-          );
-          setFullBottlePricesBN(fullBottlePriceBN);
-        });
-      let bottleVolumes: Array<string> = [];
-      bottlerContract.methods
-        .getVolumeByIndex(0)
-        .call()
-        .then((smallBottleVolume: string) => {
-          bottleVolumes[0] = smallBottleVolume;
-          bottlerContract.methods
-            .getVolumeByIndex(1)
-            .call()
-            .then((smallBottleVolume: string) => {
-              bottleVolumes[1] = smallBottleVolume;
-              bottlerContract.methods
-                .getVolumeByIndex(2)
-                .call()
-                .then((smallBottleVolume: string) => {
-                  bottleVolumes[2] = smallBottleVolume;
-                  const _bottleVolumes = bottleVolumes.map((volume) =>
-                    Number(web3Provider.web3.utils.fromWei(volume, "ether"))
-                  );
-                  console.log("_bottleVolumes", _bottleVolumes);
-                  setBottleVolumes(_bottleVolumes);
-                });
-            });
-        });
-
-      bottlerContract.methods
-        .getBottleCapacities()
-        .call()
-        .then((capacities: Array<string>) => {
-          const capacitiesBN = capacities.map((capacity) =>
-            web3Provider.web3.utils.toBN(capacity)
-          );
-          bottlerContract.methods
-            .getEmptyBottleSupplies()
-            .call()
-            .then((emptyBottlesMinted: Array<string>) => {
-              const emptyBottlesMintedBN = emptyBottlesMinted.map(
-                (emptyBottlesPoolMinted) =>
-                  web3Provider.web3.utils.toBN(emptyBottlesPoolMinted)
-              );
-              bottlerContract.methods
-                .getFullBottleSupplies()
-                .call()
-                .then((fullBottlesMinted: Array<string>) => {
-                  const fullBottlesMintedBN = fullBottlesMinted.map(
-                    (fullBottlesPoolMinted) =>
-                      web3Provider.web3.utils.toBN(fullBottlesPoolMinted)
-                  );
-
-                  const bottlesLeft = capacitiesBN.map(
-                    (capacityOfPool, poolIdx) => {
-                      var temp = new BN(capacityOfPool);
-                      temp = temp.sub(emptyBottlesMintedBN[poolIdx]);
-                      temp = temp.sub(fullBottlesMintedBN[poolIdx]);
-                      return temp;
-                    }
-                  );
-                  setBottlesLeftToMint(bottlesLeft);
-                });
-            });
-        });
+      web3Provider.chainId === targetChain.chainId,
+    refetchInterval: 10000,
+  });
+  const allowanceCache = useQuery(
+    ["bottler", "allowance"],
+    () => _allowance(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+      refetchInterval: 10000,
     }
-  }, [
-    BottlerAddress,
-    bottlerContract,
-    contract.methods,
-    setAllowance,
-    setEmptyBottles,
-    setErc20Balance,
-    setFullBottles,
-    targetChain,
-    web3Provider.account,
-    web3Provider.web3.utils,
-    web3Provider.chainId,
-    setBottleVolumes,
-    setFullBottlePrices,
-    setFullBottlePricesBN,
-    setBottlesLeftToMint,
-  ]);
+  );
+  const fullBottlesCache = useQuery(
+    ["bottler", "fullBottles"],
+    () => _fullBottles(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+      refetchInterval: 10000,
+    }
+  );
+  const emptyBottlesCache = useQuery(
+    ["bottler", "emptyBottles"],
+    () => _emptyBottles(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+      refetchInterval: 10000,
+    }
+  );
+  const fullBottlesPricesCache = useQuery(
+    ["bottler", "fullBottlesPrices"],
+    () => _fullBottlesPrices(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+      refetchInterval: 10000,
+    }
+  );
+
+  const bottleVolumesCache = useQuery(
+    ["bottler", "bottleVolumes"],
+    () => _bottleVolumes(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+      refetchInterval: 10000,
+    }
+  );
+
+  const bottlesLeftCache = useQuery(
+    ["bottler", "bottlesLeft"],
+    () => _bottlesLeft(),
+    {
+      ...queryCacheProps,
+      enabled:
+        web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+        web3Provider.chainId === targetChain.chainId,
+    }
+  );
+
   const fillBottles = useWeb3MethodCall({
     name: "fillBottles",
     contract: bottlerContract,
@@ -298,30 +351,40 @@ const useBottler = ({
 
   const toast = useToast();
 
-  console.log(
-    "bottles left to mint: ",
-    bottlesLeftToMint.map((bottlesLeftToMintBN) =>
-      bottlesLeftToMintBN.toString()
-    )
-  );
+  const queryClient = useQueryClient();
+  const syncAccountState = React.useCallback(() => {
+    const refetchBottlerQueries = async () =>
+      await queryClient.refetchQueries(["bottler", "web3"], { active: true });
+    if (
+      web3Provider.web3?.utils.isAddress(web3Provider.account) &&
+      web3Provider.chainId === targetChain.chainId
+    ) {
+      refetchBottlerQueries();
+    }
+  }, [
+    queryClient,
+    web3Provider.chainId,
+    web3Provider.account,
+    web3Provider.web3.utils,
+    targetChain.chainId,
+  ]);
 
   React.useEffect(() => {
     syncAccountState();
   }, [web3Provider.account, web3Provider.chainId, syncAccountState]);
 
   return {
-    erc20Balance,
-    allowance,
-    emptyBottles,
-    fullBottles,
-    fillBottles,
+    balanceCache,
+    allowanceCache,
+    fullBottlesCache,
+    bottleVolumesCache,
+    emptyBottlesCache,
     fillEmptyBottles,
     approveSpendMilk,
     pourFullBottles,
-    fullBottlesPrices,
-    bottleVolumes,
-    fullBottlePricesBN,
-    bottlesLeftToMint,
+    fullBottlesPricesCache,
+    bottlesLeftCache,
+    fillBottles,
   };
 };
 

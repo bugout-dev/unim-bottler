@@ -39,7 +39,7 @@ export const WALLET_STATES: WalletStatesInterface = {
 
 const Web3Context = createContext<Web3ProviderInterface>({
   web3: new Web3(null),
-  onConnectWalletClick: () => console.log("not intied"),
+  onConnectWalletClick: () => console.error("not intied"),
   buttonText: "",
   WALLET_STATES: WALLET_STATES,
   account: "",

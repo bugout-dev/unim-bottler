@@ -10,6 +10,7 @@ import {
   Flex,
   Badge,
   Text,
+  Spinner,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import useModals from "../core/hooks/useModals";
@@ -116,7 +117,9 @@ const LandingNavbar = () => {
                       src="https://darkforest.cryptounicorns.fun/static/media/icon_milk.6fc3d44e.png"
                     />
                     <Text mx={2} display={"inline-block"}>
-                      {bottler.erc20Balance}
+                      {bottler.balanceCache.data ?? (
+                        <Spinner m={0} size={"xs"} />
+                      )}
                     </Text>
                   </Flex>
                 </Badge>
@@ -126,7 +129,11 @@ const LandingNavbar = () => {
                   fontSize={"md"}
                   borderRadius={"md"}
                 >
-                  Connected:{` ${web3Provider.account}`}
+                  {web3Provider.account ? (
+                    `Connected: ${web3Provider.account}`
+                  ) : (
+                    <Spinner m={0} size={"xs"} />
+                  )}
                 </Badge>
               </Flex>
             )}
