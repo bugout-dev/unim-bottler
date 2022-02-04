@@ -101,7 +101,7 @@ const useBottler = ({
   };
   const _allowance = async (): Promise<string> => {
     return contract.methods
-      .balanceOf(`${web3Provider.account}`)
+      .allowance(`${web3Provider.account}`, `${BottlerAddress}`)
       .call()
       .then((balance: any) =>
         web3Provider.web3.utils.fromWei(balance, "ether")
